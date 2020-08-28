@@ -17,6 +17,9 @@ You can download the necessary files from August 21.
 You can download the necessary files from August 21.
 
 ## Wednesday, August 19 
+
+[![](http://img.youtube.com/vi/2_I6YZXsAzs/0.jpg)](http://www.youtube.com/watch?v=2_I6YZXsAzs "")
+
 ### Objectives:
  1. Grasp a basic understanding of the graphics pipeline
  1. Being able to utilize the Abubu.js library to draw basic shapes
