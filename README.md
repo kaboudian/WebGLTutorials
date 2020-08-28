@@ -24,6 +24,10 @@ You can download the necessary files from August 21.
 
 ## Wednesday, August 19 
 
+[![Watch the video tutorial Here](http://img.youtube.com/vi/2_I6YZXsAzs/0.jpg)](http://www.youtube.com/watch?v=2_I6YZXsAzs "Tutorial Video - Wednesday August 19, 2020")
+
+[**^^ Watch the video tutorial from the link above! ^^**](https://youtu.be/2_I6YZXsAzs)
+
 ### Objectives:
  1. Grasp a basic understanding of the graphics pipeline
  1. Being able to utilize the Abubu.js library to draw basic shapes
