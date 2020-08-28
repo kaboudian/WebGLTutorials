@@ -1,4 +1,5 @@
-# WebGL Tutorials - Special Course at GaTech (CSE-8903-C18)
+# WebGL Tutorials
+_Special Course at GaTech (CSE-8903-C18)_
 
 
 
