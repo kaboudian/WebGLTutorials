@@ -20,8 +20,6 @@ You can download the necessary files from August 21.
 
 You can download the necessary files from August 21.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/xsIviCqEbL0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
 ## Wednesday, August 19 
 
 [![Watch the video tutorial Here](http://img.youtube.com/vi/2_I6YZXsAzs/0.jpg)](http://www.youtube.com/watch?v=2_I6YZXsAzs "Tutorial Video - Wednesday August 19, 2020")
