@@ -3,6 +3,9 @@
 
 
 ## Friday, August 28
+[![](http://img.youtube.com/vi/WFw0_z5qj60/0.jpg)](http://www.youtube.com/watch?v=WFw0_z5qj60 "Tutorial Video - Friday August 28, 2020")
+
+[** ^^ Watch the video tutorial from the link above ^^ **](http://www.youtube.com/watch?v=WFw0_z5qj60)
 
 ### Objectives
 1. Writing rendering results onto textures
