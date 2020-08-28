@@ -1,4 +1,4 @@
-# WebGLTutorials
+# WebGL Tutorials - Special Course at GaTech (CSE-8903-C18)
 
 ## Friday, August 28
 ### Objectives
