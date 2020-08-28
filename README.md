@@ -6,7 +6,7 @@ _Special Course at GaTech (CSE-8903-C18)_
 ## Friday, August 28
 [![](http://img.youtube.com/vi/WFw0_z5qj60/0.jpg)](http://www.youtube.com/watch?v=WFw0_z5qj60 "Tutorial Video - Friday August 28, 2020")
 
-[** ^^ Watch the video tutorial from the link above ^^ **](http://www.youtube.com/watch?v=WFw0_z5qj60)
+[** ^^ Watch the video lecture from the link above ^^ **](http://www.youtube.com/watch?v=WFw0_z5qj60)
 
 ### Objectives
 1. Writing rendering results onto textures
@@ -17,6 +17,10 @@ _Special Course at GaTech (CSE-8903-C18)_
 You can download the necessary files from August 21.
 
 ## Friday, August 21
+[![](http://img.youtube.com/vi/xsIviCqEbL0/0.jpg)](http://www.youtube.com/watch?v=xsIviCqEbL0 "Tutorial Video - Friday August 21, 2020")
+
+[** ^^ Watch the video lecture from the link above ^^ **](http://www.youtube.com/watch?v=xsIviCqEbL0)
+
 
 ### Objectives
 1. Writing loops in GLSL
@@ -28,7 +32,7 @@ You can download the necessary files from August 21.
 
 [![Watch the video tutorial Here](http://img.youtube.com/vi/2_I6YZXsAzs/0.jpg)](http://www.youtube.com/watch?v=2_I6YZXsAzs "Tutorial Video - Wednesday August 19, 2020")
 
-[**^^ Watch the video tutorial from the link above! ^^**](https://youtu.be/2_I6YZXsAzs)
+[**^^ Watch the video lecture from the link above! ^^**](https://youtu.be/2_I6YZXsAzs)
 
 ### Objectives:
  1. Grasp a basic understanding of the graphics pipeline
