@@ -4,7 +4,7 @@ _Special Course at GaTech (CSE-8903-C18)_
 
 
 ## Friday, August 28
-[![](http://img.youtube.com/vi/WFw0_z5qj60/0.jpg)](http://www.youtube.com/watch?v=WFw0_z5qj60 "Tutorial Video - Friday August 28, 2020")
+[![Tutorial Video - Friday August 28, 2020](http://img.youtube.com/vi/WFw0_z5qj60/0.jpg)](http://www.youtube.com/watch?v=WFw0_z5qj60 "Tutorial Video - Friday August 28, 2020")
 
 [** ^^ Watch the video lecture from the link above ^^ **](http://www.youtube.com/watch?v=WFw0_z5qj60)
 
@@ -17,7 +17,7 @@ _Special Course at GaTech (CSE-8903-C18)_
 You can download the necessary files from August 21.
 
 ## Friday, August 21
-[![](http://img.youtube.com/vi/xsIviCqEbL0/0.jpg)](http://www.youtube.com/watch?v=xsIviCqEbL0 "Tutorial Video - Friday August 21, 2020")
+[![Tutorial Video - Friday August 21, 2020](http://img.youtube.com/vi/xsIviCqEbL0/0.jpg)](http://www.youtube.com/watch?v=xsIviCqEbL0 "Tutorial Video - Friday August 21, 2020")
 
 [** ^^ Watch the video lecture from the link above ^^ **](http://www.youtube.com/watch?v=xsIviCqEbL0)
 
