@@ -14,31 +14,35 @@ The files will be regularly posted here.
 
 [** ^^ Watch the video lecture from the link above ^^ **](http://www.youtube.com/watch?v=WFw0_z5qj60)
 
+You can download the files for [August 28 - Session from here](./2020-August-28).
+
 ### Objectives
 1. Writing rendering results onto textures
 1. Visualizing a particular channel of a texture
 1. Sending information to the GPU via uniforms
 1. Interacting with a WebGL code and designing a graphical interface
 
-You can download the necessary files from August 21.
 
 ## Friday, August 21
 [![Tutorial Video - Friday August 21, 2020](http://img.youtube.com/vi/xsIviCqEbL0/0.jpg)](http://www.youtube.com/watch?v=xsIviCqEbL0 "Tutorial Video - Friday August 21, 2020")
 
 [** ^^ Watch the video lecture from the link above ^^ **](http://www.youtube.com/watch?v=xsIviCqEbL0)
 
+You can download the necessary files for [August 21 Session from here](./2020-August-21).
 
 ### Objectives
 1. Writing loops in GLSL
 1. Implementing macros and functions
 
-You can download the necessary files from August 21.
+
 
 ## Wednesday, August 19 
 
 [![Watch the video tutorial Here](http://img.youtube.com/vi/2_I6YZXsAzs/0.jpg)](http://www.youtube.com/watch?v=2_I6YZXsAzs "Tutorial Video - Wednesday August 19, 2020")
 
 [**^^ Watch the video lecture from the link above! ^^**](https://youtu.be/2_I6YZXsAzs)
+
+You can download the files for [August 19 - Session from here](./2020-August-19).
 
 ### Objectives:
  1. Grasp a basic understanding of the graphics pipeline
