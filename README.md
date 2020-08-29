@@ -1,13 +1,24 @@
 # WebGL Tutorials
 _Special Course at GaTech (CSE-8903-C18)_
 
-
 ## Where to participate?
 We have regular classes on BlueJeans on Wednesday and Fridays from 3:15 pm to 4:15 pm EST. 
 
 You can join our meeting via [https://bluejeans.com/871939491/4657](https://bluejeans.com/871939491/4657).
 
 The files will be regularly posted here.
+
+
+### Useful resources:
+* If you need a refresher on HTML and JavaScript visit [w3schools.com](https://w3schools.com) that can also serve as a wonderful reference manual for JavaScript and HTML.
+* Step by step tutorials on our first sessions can be found at [tutorials section of abubujs.org](https://www.abubujs.org/learning/tutorials/?help=doc). While the documentation of the library is still lacking, the tutorial section is a great starting point.
+
+* [A quick reference guide for the GLSL language can be found here](https://www.khronos.org/files/webgl20-reference-guide.pdf)
+
+### Prerequisites:
+- Basic familiarity with computer coding preferably HTML, JavaScript and C programming
+- Having access to a text editor suitable for modifying computer code (Atom, Sublime, Notepad++, WinEdit, Bracket, VIM, EMACS)
+- Having access to a modern browser such as Google Chrome, Firefox, or similar (not Internet Explorer or Safari!)
 
 ## Friday, August 28
 [![Tutorial Video - Friday August 28, 2020](http://img.youtube.com/vi/WFw0_z5qj60/0.jpg)](http://www.youtube.com/watch?v=WFw0_z5qj60 "Tutorial Video - Friday August 28, 2020")
@@ -51,11 +62,4 @@ You can download the files for [August 19 - Session from here](./2020-August-19)
  1. Understand the basics of coloring in fragment shaders
  1. Understand the default geometries and the default geometry in Abubu.js
 
-### Prerequisites:
-- Basic familiarity with computer coding preferably HTML, JavaScript and C programming
-- Having access to a text editor suitable for modifying computer code (Atom, Sublime, Notepad++, WinEdit, Bracket, VIM, EMACS)
-- Having access to a modern browser such as Google Chrome, Firefox, or similar (not Internet Explorer or Safari!)
 
-### Useful resources:
-If you need a refresher on HTML and JavaScript visit [w3schools.com](https://w3schools.com) that can also serve as a wonderful reference manual for JavaScript and HTML.
-Step by step tutorials on our first sessions can be found at [tutorials section of abubujs.org](https://www.abubujs.org/learning/tutorials/?help=doc). While the documentation of the library is still lacking, the tutorial section is a great starting point.
