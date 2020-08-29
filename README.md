@@ -2,6 +2,12 @@
 _Special Course at GaTech (CSE-8903-C18)_
 
 
+## Where to participate?
+We have regular classes on BlueJeans on Wednesday and Fridays from 3:15 pm to 4:15 pm EST. 
+
+You can join our meeting via [https://bluejeans.com/871939491/4657](https://bluejeans.com/871939491/4657).
+
+The files will be regularly posted here.
 
 ## Friday, August 28
 [![Tutorial Video - Friday August 28, 2020](http://img.youtube.com/vi/WFw0_z5qj60/0.jpg)](http://www.youtube.com/watch?v=WFw0_z5qj60 "Tutorial Video - Friday August 28, 2020")
