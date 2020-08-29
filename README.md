@@ -1,7 +1,8 @@
 # WebGL Tutorials
 _Special Course at GaTech (CSE-8903-C18)_
 
-## Where to participate?
+## General Info
+### Where to participate?
 We have regular classes on BlueJeans on Wednesday and Fridays from 3:15 pm to 4:15 pm EST. 
 
 You can join our meeting via [https://bluejeans.com/871939491/4657](https://bluejeans.com/871939491/4657).
