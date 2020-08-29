@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<!-- Head -->
+<head>
+<script src='https://abubujs.org/libs/Abubu.latest.js'
+	type='text/javascript'></script>
+</head>
+<!-- body of the html page -->
+<body>
+    <canvas id="canvas_1" 
+            width=512 height=512
+            style="border:1px solid #000000;" >
+        <!-- This message is displayed if canvas is not available -->
+        Your browser does not support the HTML5 canvas tag.
+    </canvas>
+</body>
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- vertex shader -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script id="vshader" type="shader">#version 300 es
+precision highp float ; // high percision for float variables 
+precision highp int ;   // high percision for integer variables
+
+in vec4 position;       // position of vertices as input of the shader
+
+// Main body of the vertex shader
+void main() {
+    /*  an identity map of the position of physical 
+        world coordinates to the rendered coordinate space */
+    gl_Position = vec4(position.x,position.y,position.z,1.0);
+}
+</script>
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- fragment shader                                                    -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script id='fshader' type='shader'>#version 300 es
+precision highp float ;
+precision highp int ;
+
+out vec4 outcolor ; /*  output of the shader
+                        pixel color         */
+// Main body of the shader
+void main() {
+    /* setting r,g,b,a values of the output color as an
+       opaque red */
+    outcolor = vec4(1.0,0.,0.,1.) ;
+    return ;
+}</script>
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- Main script -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script>
+// get the shader source by its id ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function source(id){
+    return document.getElementById(id).text ;
+}
+
+// Get the canvas --------------------------------------------------------
+var canvas_1 = document.getElementById('canvas_1') ;
+
+var my_geometry = {
+    vertices :  [
+            1.0,    1.0,    0.,
+            0.0,    1.0,    0.,
+            1.0,    0.0,    0.,
+            0.0,    0.0,    0.,  // fourth point
+        ] ,
+    noVertices: 4 , // No of vertices
+    noCoords  : 3 , // No of coordinates
+    premitive : 'triangle_strip' ,
+} ;
+
+// Setup a solver --------------------------------------------------------
+var renderer = new Abubu.Solver( {
+    vertexShader    : source('vshader'),
+    fragmentShader  : source('fshader'),
+    canvas          : canvas_1,
+    /* NO GEOMETRY PROVIDED */
+} ) ;
+
+// rendering (running) the solver
+renderer.render() ;
+</script>
+</html>

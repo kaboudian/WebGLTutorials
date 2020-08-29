@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<!-- Head -->
+<head>
+<script src='https://abubujs.org/libs/Abubu.latest.js'
+	type='text/javascript'></script>
+</head>
+<!-- body of the html page -->
+<body>
+    <canvas id="canvas_1" 
+            width=512 height=512
+            style="border:1px solid #000000;" >
+        <!-- This message is displayed if canvas is not available -->
+        Your browser does not support the HTML5 canvas tag.
+    </canvas>
+</body>
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- fragment shader                                                    -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script id='fshader' type='shader'>#version 300 es
+precision highp float ;
+precision highp int ;
+
+out vec4 outcolor ; /*  output of the shader
+                        pixel color         */
+in vec2 cc ;        /* input from vertex shader */
+
+// Main body of the shader
+void main() {
+    /* Check if the pixel is inside the circle
+       and color it with a gradient. Otherwise, color it 
+       black   */
+    if ( length(cc-vec2(0.5,0.5)) < 0.2){
+        outcolor = vec4(cc.x,0.,0.,1.) ;
+    }else{
+        outcolor = vec4(0.,0.,0.,1.) ;
+    }
+    return ;
+}
+</script>
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- Main script -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script>
+// get the shader source by its id ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function source(id){
+    return document.getElementById(id).text ;
+}
+
+// Get the canvas --------------------------------------------------------
+var canvas_1 = document.getElementById('canvas_1') ;
+
+// Setup a solver --------------------------------------------------------
+var renderer = new Abubu.Solver( {
+    fragmentShader  : source('fshader'),
+    canvas          : canvas_1,
+} ) ;
+
+// rendering (running) the solver
+renderer.render() ;
+</script>
+</html>

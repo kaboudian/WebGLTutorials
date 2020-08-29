@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<!-- Head -->
+<head>
+<script src='https://abubujs.org/libs/Abubu.latest.js'
+	type='text/javascript'></script>
+</head>
+<!-- body of the html page -->
+<body>
+    <canvas id="canvas_1" 
+            width=512 height=512
+            style="border:1px solid #000000;" >
+        <!-- This message is displayed if canvas is not available -->
+        Your browser does not support the HTML5 canvas tag.
+    </canvas>
+</body>
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- fragment shader                                                    -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script id='fshader' type='shader'>#version 300 es
+precision highp float ;
+precision highp int ;
+
+out vec4 outcolor ; /*  output of the shader
+                        pixel color             */
+in vec2 cc ;        /* input from vertex shader */
+
+#define csqr(z)     vec2((z).x*(z).x-(z).y*(z).y,2.*(z).x*(z).y)
+
+// Main body of the shader
+void main() {
+    vec2 z = cc*4. - vec2(2.,2.) ; /* Initial coordinate based
+                            on pixel position */
+    vec2 c0 = vec2(-.9,0.) ;   /* the constant c0 */
+
+    float iter ;
+
+    /* Iteration loop to march the iterative map for a 1000 times */
+    for(int i=0; i<1000; i++){
+        iter = float(i) ;
+        /* the Julia map */
+        z = csqr(z) + c0 ;
+
+        if (length(z)>2.){  /* if the point is not part of the set
+                                break the loop */
+            break ;
+        }
+    }
+
+    // Output the result in the red channel of the output
+    outcolor = vec4(iter - log(log(length(z)))/log(2.),0.,0.,0.) ;
+    return ;
+}
+</script>
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- Main script -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script>
+// get the shader source by its id ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function source(id){
+    return document.getElementById(id).text ;
+}
+
+// Get the canvas --------------------------------------------------------
+var canvas_1 = document.getElementById('canvas_1') ;
+
+// Define a texture ------------------------------------------------------
+var result_texture = new Abubu.Float32Texture(512,512) ;
+
+// Setup a solver --------------------------------------------------------
+var julia = new Abubu.Solver( {
+    fragmentShader  : source('fshader'),
+    /* targets or render targets are the output/outputs of the 
+       solver. */
+    targets : {
+        outcolor : { location :0, target : result_texture } 
+    }
+} ) ;
+
+var plot = new Abubu.Plot2D({
+    target : result_texture ,   /* the texture to visualize             */
+    channel : 'r',              /* the channel of interest:
+                                        can be : 'r', 'g', 'b', or 'a' 
+                                        defualt value is 'r'            */
+    minValue : 0 ,              /* minimum value on the colormap        */
+    maxValue : 30 ,             /* maximum value on the colormap        */
+    colorbar : true ,           /* if you need to show the colorbar     */
+    canvas : canvas_1 ,         /* the canvas to draw on                */
+}) ;
+
+plot.init() ;   /* initialize the plot */
+
+/* function to run the Julia set and visualize the result   */
+function solveAndVisualize(){
+    julia.render() ;
+    plot.render() ;
+}
+
+/* calling the function to solve and visualize the set      */
+solveAndVisualize() ;
+</script>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<!-- Head -->
+<head>
+<script src='https://abubujs.org/libs/Abubu.latest.js'
+	type='text/javascript'></script>
+</head>
+<!-- body of the html page -->
+<body>
+    <canvas id="canvas_1" 
+            width=512 height=512
+            style="border:1px solid #000000;" >
+        <!-- This message is displayed if canvas is not available -->
+        Your browser does not support the HTML5 canvas tag.
+    </canvas>
+</body>
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- fragment shader                                                    -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script id='fshader' type='shader'>#version 300 es
+precision highp float ;
+precision highp int ;
+
+out vec4 outcolor ; /*  output of the shader
+                        pixel color             */
+in vec2 cc ;        /* input from vertex shader */
+
+// Main body of the shader
+void main() {
+    vec2 z0 = cc*4. - vec2(3.,2.) ; /* Initial coordinate based
+                            on pixel position */
+    vec2 z = z0 ;   /* initialize sequence with initial coordinate */
+
+    /* Iteration loop to march the iterative map for a 1000 times */
+    for(int i=0; i<1000; i++){
+
+        /* Mandelbrot map */
+        z = vec2(z.x*z.x-z.y*z.y,2.*z.x*z.y) + z0 ;
+
+        if (length(z)>2.){  /* if the point is not part of the set
+                            color it black and end fragment shader */
+            outcolor=vec4(0.,0.,0.,1.) ;
+            return ;
+        }
+    }
+
+    /* if we managed to finish the loop the point is part of the set
+       so we can color it white */
+    outcolor = vec4(1.) ;
+    return ;
+}
+</script>
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- Main script -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script>
+// get the shader source by its id ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function source(id){
+    return document.getElementById(id).text ;
+}
+
+// Get the canvas --------------------------------------------------------
+var canvas_1 = document.getElementById('canvas_1') ;
+
+// Setup a solver --------------------------------------------------------
+var renderer = new Abubu.Solver( {
+    fragmentShader  : source('fshader'),
+    canvas          : canvas_1,
+} ) ;
+
+// rendering (running) the solver
+renderer.render() ;
+</script>
+</html>
