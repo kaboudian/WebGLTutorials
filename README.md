@@ -14,7 +14,7 @@ The files will be regularly posted here.
 * If you need a refresher on HTML and JavaScript visit [w3schools.com](https://w3schools.com) that can also serve as a wonderful reference manual for JavaScript and HTML.
 * Step by step tutorials on our first sessions can be found at [tutorials section of abubujs.org](https://www.abubujs.org/learning/tutorials/?help=doc). While the documentation of the library is still lacking, the tutorial section is a great starting point.
 
-* [A quick reference guide for the GLSL language can be found here](https://www.khronos.org/files/webgl20-reference-guide.pdf)
+* [A quick reference guide for the GLSL language can be found here](https://www.khronos.org/files/webgl20-reference-guide.pdf).
 
 ### Prerequisites:
 - Basic familiarity with computer coding preferably HTML, JavaScript and C programming
@@ -45,8 +45,6 @@ You can download the necessary files for [August 21 Session from here](./2020-Au
 ### Objectives
 1. Writing loops in GLSL
 1. Implementing macros and functions
-
-
 
 ## Wednesday, August 19 
 
