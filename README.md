@@ -22,8 +22,8 @@ The files and video recording of the lectures will be regularly posted here.
 - Having access to a modern browser such as Google Chrome, Firefox, or similar (not Internet Explorer or Safari!)
 
 ## Wednesday, September 2
-
-**_THE VIDEO LECTURE WILL BE POSTED HERE!_**
+[![Tutorial Video - Wednesday, September 2](http://img.youtube.com/vi/xPEiBXWzNO4/0.jpg)](http://www.youtube.com/watch?v=xPEiBXWzNO4 "Tutorial Video - Wednesday, September 2")
+[**^^ Watch the video lecture from the link above! ^^**](http://www.youtube.com/watch?v=xPEiBXWzNO4)
 
 ### Objectives
 1. Initialize a domain using a solver
