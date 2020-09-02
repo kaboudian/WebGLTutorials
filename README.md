@@ -30,7 +30,6 @@ The files and video recording of the lectures will be regularly posted here.
 1. Initialize a domain using a solver
 1. Visualize the solution
 1. Implement a simple time marching algorithm
-1. Learn more about the debugging features of the console
 1. Understand even and odd time steps and why they are treated individually
 1. Understand how to use a single shader to implement both even and odd time steps
 1. Create the time marching loop
