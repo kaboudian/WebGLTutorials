@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<!-- Head -->
+<head>
+<script src='https://abubujs.org/libs/Abubu.latest.js'
+	type='text/javascript'></script>
+</head>
+<!-- body of the html page -->
+<body>
+    <canvas id="canvas_1" 
+            width=512 height=512
+            style="border:1px solid #000000;" >
+        <!-- This message is displayed if canvas is not available -->
+        Your browser does not support the HTML5 canvas tag.
+    </canvas>
+</body>
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- init fragment shader                                               -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script id='init' type='shader'>#version 300 es
+precision highp float ;
+precision highp int ;
+
+in vec2 cc, pixPos ;
+
+layout (location = 0) out vec4 color1 ;
+layout (location = 1) out vec4 color2 ;
+// Main body of the shader
+void main() {
+    vec4 color = vec4(0.) ;
+    
+    if ( length(cc-vec2(0.5))<0.1){
+        color.r = 1. ;
+    }
+
+    color1 = color ;
+    color2 = color ;
+    return ;
+}
+</script>
+
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- Main script -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script>
+// get the shader source by its id ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function source(id){
+    return document.getElementById(id).text ;
+}
+
+// Get the canvas ........................................................
+var canvas_1 = document.getElementById('canvas_1') ;
+
+// Object to be used for interactions ....................................
+var env = {
+        dt : 0.01 ,
+        diffCoef :0.001,
+} ;
+
+// defining the textures .................................................
+var fcolor = new Abubu.Float32Texture(512,512) ;
+var scolor = new Abubu.Float32Texture(512,512) ;
+
+// Setup a solver ........................................................
+var init = new Abubu.Solver( {
+    fragmentShader  : source('init'),
+    targets : {
+        color1 : { location :0, target : fcolor  } ,
+        color2 : { location :1, target : scolor  } ,
+
+    }
+} ) ;
+init.render() ;
+
+// post processing .......................................................
+var plot = new Abubu.Plot2D({
+    target : fcolor,   /* the texture to visualize             */
+    channel : 'r',              /* the channel of interest:
+                                        can be : 'r', 'g', 'b', or 'a' 
+                                        defualt value is 'r'            */
+    minValue : 0 ,              /* minimum value on the colormap        */
+    maxValue : 1 ,             /* maximum value on the colormap        */
+    colorbar : true ,           /* if you need to show the colorbar     */
+    canvas : canvas_1 ,         /* the canvas to draw on                */
+}) ;
+
+plot.init() ;   /* initialize the plot */
+plot.render() ;
+
+// create the graphical user interface ...................................
+function createGui(){
+    var gui = new Abubu.Gui() ;     /*  create a graphical user 
+                                        interface               */
+    var panel = gui.addPanel() ;    /*  add a panel to the GUI  */
+}
+
+/* run createGui to create the graphical user interface     */
+createGui() ;
+</script>
+</html>

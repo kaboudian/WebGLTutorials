@@ -21,10 +21,26 @@ The files and video recording of the lectures will be regularly posted here.
 - Having access to a text editor suitable for modifying computer code (Atom, Sublime, Notepad++, WinEdit, Bracket, VIM, EMACS)
 - Having access to a modern browser such as Google Chrome, Firefox, or similar (not Internet Explorer or Safari!)
 
+## Wednesday, September 2
+
+**_THE VIDEO LECTURE WILL BE POSTED HERE!_**
+
+### Objectives
+1. Initialize a domain using a solver
+1. Visualize the solution
+1. Implement a simple time marching algorithm
+1. Learn more about the debugging features of the console
+1. Understand even and odd time steps and why they are treated individually
+1. Understand how to use a single shader to implement both even and odd time steps
+1. Create the time marching loop
+1. Interactive with a live simulation via GUI
+
+You can download the necessary files for [September 2 session from here](./2020-September-02)
+
 ## Friday, August 28
 [![Tutorial Video - Friday August 28, 2020](http://img.youtube.com/vi/WFw0_z5qj60/0.jpg)](http://www.youtube.com/watch?v=WFw0_z5qj60 "Tutorial Video - Friday August 28, 2020")
 
-[** ^^ Watch the video lecture from the link above ^^ **](http://www.youtube.com/watch?v=WFw0_z5qj60)
+[**^^ Watch the video lecture from the link above! ^^**](http://www.youtube.com/watch?v=WFw0_z5qj60)
 
 You can download the files for [August 28 - Session from here](./2020-August-28).
 
@@ -38,7 +54,7 @@ You can download the files for [August 28 - Session from here](./2020-August-28)
 ## Friday, August 21
 [![Tutorial Video - Friday August 21, 2020](http://img.youtube.com/vi/xsIviCqEbL0/0.jpg)](http://www.youtube.com/watch?v=xsIviCqEbL0 "Tutorial Video - Friday August 21, 2020")
 
-[** ^^ Watch the video lecture from the link above ^^ **](http://www.youtube.com/watch?v=xsIviCqEbL0)
+[**^^ Watch the video lecture from the link above! ^^**](http://www.youtube.com/watch?v=xsIviCqEbL0)
 
 You can download the necessary files for [August 21 Session from here](./2020-August-21).
 
