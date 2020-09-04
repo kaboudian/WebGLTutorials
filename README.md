@@ -21,6 +21,14 @@ The files and video recording of the lectures will be regularly posted here.
 - Having access to a text editor suitable for modifying computer code (Atom, Sublime, Notepad++, WinEdit, Bracket, VIM, EMACS)
 - Having access to a modern browser such as Google Chrome, Firefox, or similar (not Internet Explorer or Safari!)
 
+## Friday, September 4
+
+### Objectives
+1. Changing variables based on time 
+1. Handling events 
+1. Handling mouse events and integration with the ongoing simulations 
+
+
 ## Wednesday, September 2
 [![Tutorial Video - Wednesday, September 2](http://img.youtube.com/vi/xPEiBXWzNO4/0.jpg)](http://www.youtube.com/watch?v=xPEiBXWzNO4 "Tutorial Video - Wednesday, September 2")
 
