@@ -24,7 +24,8 @@ The files and video recording of the lectures will be regularly posted here.
 ## Friday, September 4
 
 ### Objectives
-1. Changing variables based on time 
+1. Changing variables based on time in the shader
+1. A better way of handing off uniforms
 1. Handling events 
 1. Handling mouse events and integration with the ongoing simulations 
 
