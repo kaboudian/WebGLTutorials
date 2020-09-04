@@ -30,9 +30,9 @@ layout (location = 1) out vec4 color2 ;
 void main() {
     vec4 color = vec4(0.) ;
     
-    if ( length(cc-vec2(0.5))<0.1){
-        color.r = 1. ;
-    }
+//    if ( length(cc-vec2(0.5))<0.1){
+//        color.r = 1. ;
+//    }
 
     color1 = color ;
     color2 = color ;
@@ -49,6 +49,7 @@ precision highp int ;
 
 uniform sampler2D   inTexture ;
 uniform float       dt, diffCoef ;
+uniform float       period ;
 
 in vec2 cc, pixPos ;
 
@@ -88,14 +89,57 @@ void main() {
     u += du2dt*dt ;
     v += dv2dt*dt ;
 
+    // pacing algorithm
+    time += dt ;
+    if ( time > period ){
+        if(length(cc) <0.1){
+            u = 1. ;
+        }
+        time = 0. ;
+    }
+
+
     // output the color of the pixel .....................................
     ocolor = color ;
     return ;
 }
 </script>
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- march fragment shader                                               -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script id='click' type='shader'>#version 300 es
+precision highp float ;
+precision highp int ;
+
+uniform sampler2D   inTexture ;
+uniform vec2    clickPosition ;
+uniform float   clickRadius ;
+in vec2 cc, pixPos ;
+
+layout (location = 0) out vec4 fcolor ;
+
+#define u       color.r
+#define v       color.g
+#define time    color.b
+// Main body of the shader
+void main() {
+    vec2  size  = vec2(textureSize(inTexture, 0)) ;
+
+    // read the color of the pixel .......................................
+    vec4 color = texture( inTexture , cc ) ;
+ 
+    if ( length(cc-clickPosition)<clickRadius ){
+        u = 1. ;
+    }
+    
+    // output the color of the pixel .....................................
+    fcolor = color ;
+    return ;
+}
+</script>
 
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
-<!-- Main script -->
+<!-- Main script  JavaScript Language - CPU SIDE                        -->
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
 <script>
 // get the shader source by its id ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -111,7 +155,9 @@ var env = {
         dt : 0.05 ,
         diffCoef :0.001,
         time : 0 ,
-        running : true ,
+        running : false ,
+        skip : 20 ,
+        period : 200 ,
     } ;
 
 // defining the textures .................................................
@@ -145,13 +191,27 @@ plot.init() ;   /* initialize the plot */
 plot.render() ;
 
 // marching steps ........................................................
+function marchingUniforms( _inTexture ){
+    var uniform = { 
+                inTexture   : { type : 't', value : _inTexture      } ,
+                dt          : { type : 'f', value : env.dt          } ,
+                diffCoef    : { type : 'f', value : env.diffCoef    } ,
+                period      : { type : 'f', value : env.period      } ,
+    } ;
+    return uniform ;
+}
+
+function marchUniforms(_inTexture ){
+    this.inTexture   = { type : 't', value : _inTexture      } ;
+    this.dt          = { type : 'f', value : env.dt          } ;
+    this.diffCoef    = { type : 'f', value : env.diffCoef    } ;
+    this.period      = { type : 'f', value : env.period      } ;
+    return this ;
+}
+
 var fmarch = new Abubu.Solver({
         fragmentShader : source( 'march' ) ,
-        uniforms : { 
-                inTexture   : { type : 't', value : fcolor      } ,
-                dt          : { type : 'f', value : env.dt      } ,
-                diffCoef    : { type : 'f', value : env.diffCoef} ,
-        } ,
+        uniforms : new marchUniforms( fcolor ),
         targets : {
                 ocolor : { location : 0, target : scolor } 
         }
@@ -159,15 +219,11 @@ var fmarch = new Abubu.Solver({
 
 var smarch = new Abubu.Solver({
         fragmentShader : source( 'march' ) ,
-        uniforms : { 
-                inTexture   : { type : 't', value : scolor      } ,
-                dt          : { type : 'f', value : env.dt      } ,
-                diffCoef    : { type : 'f', value : env.diffCoef} ,
-        } ,
+        uniforms : new marchUniforms( scolor ) ,
         targets : {
                 ocolor : { location : 0, target : fcolor } 
         }
-    } ) ;
+} ) ;
 
 // march the solution for two time steps
 function march(){
@@ -175,10 +231,34 @@ function march(){
     smarch.render() ;
     env.time += env.dt*2. ;
 }
+//
+var click = new Abubu.Solver({
+    fragmentShader : source('click') ,
+    uniforms : { 
+        inTexture : { type : 't' , value : fcolor } ,
+        clickRadius : { type : 'f', value : 0.05  } ,
+        clickPosition: { type :'v2', value : [0.,0.] } ,
+    } ,
+    targets : {
+         fcolor : { location : 0, target : scolor }, 
+    }
+} ) ;
+var clickCopy = new Abubu.Copy( scolor, fcolor ) ;
+
+var myMouseDrag = new Abubu.MouseListener({
+    canvas : canvas_1 ,
+    event : 'drag' ,
+    callback : function(e){
+        click.uniforms.clickPosition.value = e.position ;
+        click.render() ;
+        clickCopy.render() ;
+    }
+} ) ;
+
 
 function run(){
         if (env.running){
-            for(var i = 0 ; i< 2 ; i++){
+            for(var i = 0 ; i< env.skip ; i++){
                 march() ;
             }
         }
@@ -193,8 +273,21 @@ function createGui(){
                                         interface               */
     var panel = gui.addPanel() ;    /*  add a panel to the GUI  */
     panel.add(env,'time').listen() ;
+    panel.add(env,'skip') ;
     panel.add(env,'running') ;
     
+    panel.add(env,'dt').step(0.001).onChange(function(){
+        // send the information to GPU
+        fmarch.uniforms.dt.value = env.dt ;
+        smarch.uniforms.dt.value = env.dt ;
+    } ) ;
+
+    panel.add(env,'period').step(5).onChange(function(){
+        // send the information to GPU
+        fmarch.uniforms.period.value = env.period ;
+        smarch.uniforms.period.value = env.period ;
+    } ) ;
+
 }
 
 /* run createGui to create the graphical user interface     */
