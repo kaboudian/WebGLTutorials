@@ -5,7 +5,7 @@ _Special Course at GaTech (CSE-8903-C18)_
 ### Where to participate?
 We have regular classes on BlueJeans on Wednesday and Fridays from 3:15 pm to 4:15 pm EST. 
 
-If you are interested email us at [abouzar.kaboudian@physics.gatech.edu](mailto:abouzar.kaboudian@physics.gatech.edu) or [echerry30@gatech.edu](mailto:echerry30@gatech.edu).
+If you are interested to participate in the class or you are looking for a collaborative project email us at [abouzar.kaboudian@physics.gatech.edu](mailto:abouzar.kaboudian@physics.gatech.edu), [flavio.fenton@physics.gatech.edu](mailto:flavio.fenton@physics.gatech.edu), or [echerry30@gatech.edu](mailto:echerry30@gatech.edu).
 
 The files and video recording of the lectures will be regularly posted here.
 
