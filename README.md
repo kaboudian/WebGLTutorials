@@ -69,19 +69,17 @@ You can download the files for [August 28 - Session from here](./2020-August-28)
 
 [**^^ Watch the video lecture from the link above! ^^**](http://www.youtube.com/watch?v=xsIviCqEbL0)
 
-You can download the necessary files for [August 21 Session from here](./2020-August-21).
-
 ### Objectives
 1. Writing loops in GLSL
 1. Implementing macros and functions
+
+You can download the necessary files for [August 21 Session from here](./2020-August-21).
 
 ## Wednesday, August 19 
 
 [![Watch the video tutorial Here](http://img.youtube.com/vi/2_I6YZXsAzs/0.jpg)](http://www.youtube.com/watch?v=2_I6YZXsAzs "Tutorial Video - Wednesday August 19, 2020")
 
 [**^^ Watch the video lecture from the link above! ^^**](https://youtu.be/2_I6YZXsAzs)
-
-You can download the files for [August 19 - Session from here](./2020-August-19).
 
 ### Objectives:
  1. Grasp a basic understanding of the graphics pipeline
@@ -90,4 +88,4 @@ You can download the files for [August 19 - Session from here](./2020-August-19)
  1. Understand the basics of coloring in fragment shaders
  1. Understand the default geometries and the default geometry in Abubu.js
 
-
+You can download the files for [August 19 - Session from here](./2020-August-19).
