@@ -32,6 +32,7 @@ The files and video recording of the lectures will be regularly posted here.
 1. A reminder that variables changed in the GUI need to be send to all solvers that utilize them.
 1. Handling mouse events (drag) and integration with an ongoing simulation
 
+You can download the necessary files for [September 4 session from here](./2020-September-02)
 
 ## Wednesday, September 2
 [![Tutorial Video - Wednesday, September 2](http://img.youtube.com/vi/xPEiBXWzNO4/0.jpg)](http://www.youtube.com/watch?v=xPEiBXWzNO4 "Tutorial Video - Wednesday, September 2")
