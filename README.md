@@ -55,14 +55,13 @@ You can download the necessary files for [September 2 session from here](./2020-
 
 [**^^ Watch the video lecture from the link above! ^^**](http://www.youtube.com/watch?v=WFw0_z5qj60)
 
-You can download the files for [August 28 - Session from here](./2020-August-28).
-
 ### Objectives
 1. Writing rendering results onto textures
 1. Visualizing a particular channel of a texture
 1. Sending information to the GPU via uniforms
 1. Interacting with a WebGL code and designing a graphical interface
 
+You can download the files for [August 28 - Session from here](./2020-August-28).
 
 ## Friday, August 21
 [![Tutorial Video - Friday August 21, 2020](http://img.youtube.com/vi/xsIviCqEbL0/0.jpg)](http://www.youtube.com/watch?v=xsIviCqEbL0 "Tutorial Video - Friday August 21, 2020")
