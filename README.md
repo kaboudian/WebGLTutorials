@@ -20,6 +20,18 @@ The files and video recordings of the lectures will be regularly posted here.
 - Basic familiarity with computer coding preferably HTML, JavaScript and C programming
 - Having access to a text editor suitable for modifying computer code (Atom, Sublime, Notepad++, WinEdit, Bracket, VIM, EMACS)
 - Having access to a modern browser such as Google Chrome, Firefox, or similar (not Internet Explorer or Safari!)
+## Wednesday, September 9
+[![September 09](http://img.youtube.com/vi/IhhOs7cRzXM/0.jpg)](http://www.youtube.com/watch?v=IhhOs7cRzXM "September 09")
+
+[**^^ Watch the video lecture from the link above! ^^**](http://www.youtube.com/watch?v=IhhOs7cRzXM)
+
+### Objectives
+1. Get familiar with implementing 3D data using 2D textures
+1. Get familiar with using the 3D data in the shader
+2. Get familiar with visualizing 3D data
+
+You can download the necessary files for [September 9 session from here](./2020-September-09)
+
 
 ## Friday, September 4
 [![Friday, September 4](http://img.youtube.com/vi/5s_a8D_kHRk/0.jpg)](http://www.youtube.com/watch?v=5s_a8D_kHRk "Friday, September 4")
