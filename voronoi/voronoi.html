@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <script src="https://abubujs.org/libs/Abubu.latest.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <canvas id="canvas_1" width=512 height=512 style="border:1px solid #000000;">
+      Your browser does not support the HTML5 canvas tag.
+    </canvas>
+  </body>
+
+  <!-- Voronoi fragment shader -->
+  <script id="voronoi_shader" type="shader">#version 300 es
+    precision highp float;
+    precision highp int;
+
+    uniform vec2 point_0;
+    uniform vec2 point_1;
+    uniform vec2 point_2;
+    uniform vec2 point_3;
+    uniform vec2 point_4;
+    uniform vec2 point_5;
+    uniform vec2 point_6;
+    uniform vec2 point_7;
+
+    uniform vec3 color_0;
+    uniform vec3 color_1;
+    uniform vec3 color_2;
+    uniform vec3 color_3;
+    uniform vec3 color_4;
+    uniform vec3 color_5;
+    uniform vec3 color_6;
+    uniform vec3 color_7;
+
+#define euclid(a, b) sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y))
+
+    in vec2 cc;
+
+    out vec4 outcolor;
+
+    vec2 points[8];
+    vec3 colors[8];
+
+    void main() {
+      points[0] = point_0;
+      points[1] = point_1;
+      points[2] = point_2;
+      points[3] = point_3;
+      points[4] = point_4;
+      points[5] = point_5;
+      points[6] = point_6;
+      points[7] = point_7;
+
+      colors[0] = color_0;
+      colors[1] = color_1;
+      colors[2] = color_2;
+      colors[3] = color_3;
+      colors[4] = color_4;
+      colors[5] = color_5;
+      colors[6] = color_6;
+      colors[7] = color_7;
+
+      int index = -1;
+      float distance = 2.;
+      float new_distance;
+
+      // Find the nearest point.
+      for (int i = 0; i < 8; ++i) {
+        // Stop if there are no more points on the canvas.
+        if (points[i].x < 0.) {
+          break;
+        }
+
+        new_distance = euclid(points[i], cc);
+
+        if (new_distance < distance) {
+          distance = new_distance;
+          index = i;
+        }
+      }
+
+      // Set the color to white if there are no points.
+      if (index < 0) {
+        outcolor = vec4(1., 1., 1., 1.);
+        return;
+      }
+
+      // Set the color to black if the point is very close.
+      if (distance < 0.01) {
+        outcolor = vec4(0., 0., 0., 1.);
+        return;
+      }
+
+      // In all other cases, use the color assigned to the point.
+      outcolor = vec4(colors[index].r, colors[index].g, colors[index].b, 1.);
+      return;
+    }
+  </script>
+
+  <!-- Main script -->
+  <script>
+    function source(id) {
+      return document.getElementById(id).text;
+    }
+
+    var canvas_1 = document.getElementById('canvas_1');
+
+    var point_index = 0;
+    var point_uniforms = {};
+    var color_uniforms = {};
+
+    // Initialize uniform values
+    for (i = 0; i < 8; ++i) {
+      // For the points, start out of bounds so the canvas is blank at first.
+      point_uniforms['point_' + i] = {
+        type: 'v2',
+        value: [-1, -1],
+      };
+
+      // For the colors, create an RGB value for each point.
+      color_uniforms['color_' + i] = {
+        type: 'v3',
+        value: [Math.random(), Math.random(), Math.random()],
+      }
+    }
+
+    var renderer = new Abubu.Solver({
+      fragmentShader: source('voronoi_shader'),
+      uniforms: { ...point_uniforms, ...color_uniforms },
+      canvas: canvas_1,
+    });
+
+    renderer.render();
+
+    // Add a new point on click, or replace the oldest one if there are too many.
+    var clickListener = new Abubu.MouseListener({
+      canvas: canvas_1,
+      event: 'click',
+      callback: (event) => {
+        renderer.uniforms['point_' + point_index].value = event.position;
+        point_index = (point_index + 1) % 8;
+        renderer.render();
+      }
+    });
+  </script>
+</html>
