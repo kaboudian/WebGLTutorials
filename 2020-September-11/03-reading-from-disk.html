@@ -30,7 +30,17 @@ function processFile(){
     // only the when the file is loaded it can be analyzed
     reader.onload = function(event){
         var result  = event.target.result ;
-        console.log(result) ;
+        var data = result.split(',') ;
+
+        var width = parseInt(data[0]) ;
+        var height = parseInt(data[1]) ;
+
+        var table = new Float32Array(width*height*4) ;
+        var p = 0 ;
+        for (var i=2 ; i< data.length; i++){
+            table[p++] = parseFloat( data[i]) ;
+        }
+        console.log(table) ;
     }
 }
 

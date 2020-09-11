@@ -19,6 +19,13 @@
         <!-- This message is displayed if canvas is not available -->
         Your browser does not support the HTML5 canvas tag.
     </canvas>
+    </br>
+
+    <button onclick='saveCsvFile()'>Save CSV data!</button>
+   
+    <p>Select a file : <input type='file' id="myFile"></p>
+    <button onclick='processFile()'>Process</button>
+ 
 </body>
 
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
@@ -91,6 +98,49 @@ var display2 = new Abubu.Solver( {
     canvas : document.getElementById('canvas_2') ,
 } ) ;
 display2.run() ;
+/*=========================================================================
+ * saveCsvFile : save an array to disk as comma separated values
+ *=========================================================================
+ */
+function saveCsvFile(){
+    var link = document.createElement('a') ;
+    var data = "data:text;charset=utf-8," +
+        texture1.width + ',' + 
+        texture1.height + ',' + 
+        texture1.value.join() ;
+
+    var csv = encodeURI( data ) ;
+    link.setAttribute( 'href', csv ) ;
+    link.setAttribute( 'download', 'texture1.csv' ) ;
+    link.click() ;
+}
+/*=========================================================================
+ * processFile  : read a CSV file into the html page
+ *=========================================================================
+ */
+function processFile(){
+    var file = document.querySelector("#myFile").files[0] ;
+    var reader = new FileReader() ;
+    reader.readAsText(file) ;
+
+    // only the when the file is loaded it can be analyzed
+    reader.onload = function(event){
+        var result  = event.target.result ;
+        var data = result.split(',') ;
+
+        var width = parseInt(data[0]) ;
+        var height = parseInt(data[1]) ;
+
+        var table = new Float32Array(width*height*4) ;
+        var p = 0 ;
+        for (var i=2 ; i< data.length; i++){
+            table[p++] = parseFloat( data[i]) ;
+        }
+
+        texture2.data = table ;
+        display2.render() ;
+    }
+}
 
 </script>
 </html>

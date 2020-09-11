@@ -13,6 +13,14 @@
         <!-- This message is displayed if canvas is not available -->
         Your browser does not support the HTML5 canvas tag.
     </canvas>
+
+    </br>
+
+    <button onclick='saveCsvFile()'>Save CSV data!</button>
+   
+    <p>Select a file : <input type='file' id="myFile"></p>
+    <button onclick='processFile()'>Process</button>
+
 </body>
 
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
@@ -160,8 +168,10 @@ var env = {
     } ;
 
 // defining the textures .................................................
-var fcolor = new Abubu.Float32Texture(512,512 ) ;
+var fcolor = new Abubu.Float32Texture(512,512, 
+    { pairable : true } ) ;
 var scolor = new Abubu.Float32Texture(512,512 ) ;
+scolor.pairable = true ;
 
 // Setup a solver ........................................................
 var init = new Abubu.Solver( {
@@ -254,6 +264,57 @@ var mouseDrag = new Abubu.MouseListener({
         clickCopy.render() ;
     }
 } ) ; 
+/*=========================================================================
+ * saveCsvFile : save an array to disk as comma separated values
+ *=========================================================================
+ */
+function saveCsvFile(){
+    var link = document.createElement('a') ;
+    var data = "data:text;charset=utf-8," +
+        fcolor.width + ',' + 
+        fcolor.height + ',' + 
+        fcolor.value.join() 
+        /* 
+         secondTexture.value.join() +
+         thirdTexture.value.join() +
+            .
+            .
+            .
+            */
+        ;
+
+    var csv = encodeURI( data ) ;
+    link.setAttribute( 'href', csv ) ;
+    link.setAttribute( 'download', 'fcolor.csv' ) ;
+    link.click() ;
+}
+/*=========================================================================
+ * processFile  : read a CSV file into the html page
+ *=========================================================================
+ */
+function processFile(){
+    var file = document.querySelector("#myFile").files[0] ;
+    var reader = new FileReader() ;
+    reader.readAsText(file) ;
+
+    // only the when the file is loaded it can be analyzed
+    reader.onload = function(event){
+        var result  = event.target.result ;
+        var data = result.split(',') ;
+
+        var width = parseInt(data[0]) ;
+        var height = parseInt(data[1]) ;
+
+        var table = new Float32Array(width*height*4) ;
+        var p = 0 ;
+        for (var i=2 ; i< data.length; i++){ // modify accordingly
+            table[p++] = parseFloat( data[i]) ;
+        }
+
+        fcolor.data = table ;
+        scolor.data = table ;
+    }
+}
 
 // create the graphical user interface ...................................
 function createGui(){

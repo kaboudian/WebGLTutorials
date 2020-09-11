@@ -34,7 +34,7 @@ void main() {
 </script>
 
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
-<!-- Main script -->
+<!-- Main script // JavaScript part - CPU side code                     -->
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
 <script>
 // get the shader source by its id ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -42,17 +42,46 @@ function source(id){
     return document.getElementById(id).text ;
 }
 
-var width   = 16 ;
-var height  = 16 ;
+var width   = 8 ;
+var height  = 8 ;
+
+var table = new Float32Array( width*height*4 ) ;
+var p = 0 ;
+for( var j=0 ; j< height; j++) {
+    for (var i=0; i<width ; i++){
+        table[p++] = i/width ;      // red   channel
+        table[p++] = j/height ;     // green channel
+        table[p++] = 0. ;           // blue  channel
+        table[p++] = 1. ;           // alpha channel
+    }
+}
 
 // texture definition
-var texture = new Abubu.Float32Texture(width, height ) ;
+//var texture = new Abubu.Float32Texture(width, height, { data : table } ) ;
+var texture = new Abubu.Float32Texture(width, height, 
+    { magFilter : 'linear'} ) ;
+texture.data = table ;
+//texture.magFilter = 'linear' ;
+
+var texture2 = new Abubu.Float32Texture(512, 512) ;
+var solver = new Abubu.Solver( {
+    fragmentShader  : source('fshader'),
+    uniforms        : { 
+        inText : { type : 't', value : texture } ,
+    } ,
+    targets : {
+        color : { location :0 , target : texture2 } ,
+    }
+} ) ;
+solver.run() ;
+
+Abubu.copyTexture(texture1, texture2) ;
 
 // Setup a solver --------------------------------------------------------
 var display1 = new Abubu.Solver( {
     fragmentShader  : source('fshader'),
     uniforms        : { 
-        inText : { type : 't', value : texture } ,
+        inText : { type : 't', value : texture2 } ,
     } ,
     canvas : document.getElementById('canvas_1') ,
 } ) ;

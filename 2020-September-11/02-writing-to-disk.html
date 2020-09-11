@@ -8,7 +8,7 @@
 <!-- body of the html page -->
 <body>
 <button onclick='saveCsvFile()'>Save CSV data!</button>
-
+<a href='some internet address' download='file.dat'>Some text</a>
 </body>
 
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
@@ -36,8 +36,10 @@ for(var j=0; j<height ; j++){     // represents row    numbers
  */
 function saveCsvFile(){
     var link = document.createElement('a') ;
-    var data = "data:text;charset=utf-8," ;
-    data += "Hello world!" ;
+    var data = "data:text;charset=utf-8," +
+        width + ',' + 
+        height + ',' + 
+        table.join() ;
 
     var csv = encodeURI( data ) ;
     link.setAttribute( 'href', csv ) ;
