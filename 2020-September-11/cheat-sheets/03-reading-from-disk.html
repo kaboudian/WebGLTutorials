@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<!-- Head -->
+<head>
+<script src='https://abubujs.org/libs/Abubu.latest.js'
+	type='text/javascript'></script>
+</head>
+<!-- body of the html page -->
+<body>
+
+<p>Select a file : <input type='file' id="myFile"></p>
+<button onclick='processFile()'>Process</button>
+
+</body>
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- Main script -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script>
+
+/*=========================================================================
+ * processFile  : read a CSV file into the html page
+ *=========================================================================
+ */
+function processFile(){
+    var file = document.querySelector("#myFile").files[0] ;
+    var reader = new FileReader() ;
+    reader.readAsText(file) ;
+
+    // only the when the file is loaded it can be analyzed
+    reader.onload = function(event){
+        var result  = event.target.result ;
+        var data    = result.split(',') ;   /* using comma as a separator */
+        var width   = parseInt( data[0] ) ; 
+        var height  = parseInt( data[1] ) ;
+        
+        var table = new Float32Array(width*height*4) ;
+
+        var p = 0 ;
+        for(var i=2; i<data.length ; i++){
+            table[p++] = parseFloat(data[i]) ;
+        }
+        console.log(table) ;
+    }
+}
+
+</script>
+</html>
