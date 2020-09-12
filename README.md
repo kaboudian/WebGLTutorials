@@ -20,6 +20,21 @@ The files and video recordings of the lectures will be regularly posted here.
 - Basic familiarity with computer coding preferably HTML, JavaScript and C programming
 - Having access to a text editor suitable for modifying computer code (Atom, Sublime, Notepad++, WinEdit, Bracket, VIM, EMACS)
 - Having access to a modern browser such as Google Chrome, Firefox, or similar (not Internet Explorer or Safari!)
+
+## Friday, September 11
+[![Friday September 11](http://img.youtube.com/vi/iTFqxnIOVqg/0.jpg)](http://www.youtube.com/watch?v=iTFqxnIOVqg "Friday September 11")
+
+[**^^ Watch the video lecture from the link above! ^^**](http://www.youtube.com/watch?v=iTFqxnIOVqg)
+
+### Objectives
+1. Initializing a texture from the CPU/JavaScript side
+1. Accessing the values of the texture on the CPU/JavaScript side
+1. Writing the texture data to disk
+1. Reading the texture data from disk
+
+You can download the necessary files for [September 11 session from here](./2020-September-11)
+
+
 ## Wednesday, September 9
 [![September 09](http://img.youtube.com/vi/IhhOs7cRzXM/0.jpg)](http://www.youtube.com/watch?v=IhhOs7cRzXM "September 09")
 
