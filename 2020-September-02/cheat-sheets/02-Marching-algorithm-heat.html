@@ -13,6 +13,13 @@
         <!-- This message is displayed if canvas is not available -->
         Your browser does not support the HTML5 canvas tag.
     </canvas>
+
+    <canvas id="canvas_2" 
+            width=512 height=512
+            style="border:1px solid #000000;" >
+        <!-- This message is displayed if canvas is not available -->
+        Your browser does not support the HTML5 canvas tag.
+    </canvas>
 </body>
 
 <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
@@ -26,6 +33,8 @@ in vec2 cc, pixPos ;
 
 layout (location = 0) out vec4 color1 ;
 layout (location = 1) out vec4 color2 ;
+layout (location = 2) out vec4 color3 ;
+layout (location = 3) out vec4 color4 ;
 // Main body of the shader
 void main() {
     vec4 color = vec4(0.) ;
@@ -36,6 +45,8 @@ void main() {
 
     color1 = color ;
     color2 = color ;
+    color3 = color ;
+    color4 = color ;
     return ;
 }
 </script>
@@ -53,6 +64,7 @@ uniform float       dt, diffCoef ;
 in vec2 cc, pixPos ;
 
 layout (location = 0) out vec4 ocolor ;
+layout (location = 1) out vec4 out2color ;
 
 #define u       color.r
 #define v       color.g
@@ -68,7 +80,7 @@ void main() {
     // read the color of the pixel .......................................
     vec4 color = texture( inTexture , cc ) ;
     
-
+    
     //if (u < 0.5 ){
     //    u = 1. ;
     //}else{
@@ -84,6 +96,7 @@ void main() {
 
     // output the color of the pixel .....................................
     ocolor = color ;
+    out2color = color ;
     return ;
 }
 </script>
@@ -99,6 +112,7 @@ function source(id){
 
 // Get the canvas ........................................................
 var canvas_1 = document.getElementById('canvas_1') ;
+var canvas_2 = document.getElementById('canvas_2') ;
 
 // Object to be used for interactions ....................................
 var env = {
@@ -111,14 +125,18 @@ var env = {
 // defining the textures .................................................
 var fcolor = new Abubu.Float32Texture(512,512) ;
 var scolor = new Abubu.Float32Texture(512,512) ;
+var firstcolor = new Abubu.Float32Texture(512,512) ;
+var secondcolor = new Abubu.Float32Texture(512,512) ;
+
 
 // Setup a solver ........................................................
 var init = new Abubu.Solver( {
     fragmentShader  : source('init'),
     targets : {
-        color1 : { location :0, target : fcolor  } ,
-        color2 : { location :1, target : scolor  } ,
-
+        color1 : { location : 0, target : fcolor  } ,
+        color2 : { location : 1, target : scolor  } ,
+        color3 : { location : 3, target : firstcolor },
+        color4 : { location : 4, target : secondcolor },
     }
 } ) ;
 init.render() ;
@@ -135,31 +153,67 @@ var plot = new Abubu.Plot2D({
     canvas : canvas_1 ,         /* the canvas to draw on                */
 }) ;
 
+var plotsecond = new Abubu.Plot2D({
+    target : firstcolor,
+    channel: 'r',
+    minValue : 0 ,              /* minimum value on the colormap        */
+    maxValue : 1 ,             /* maximum value on the colormap        */
+    colorbar : true ,           /* if you need to show the colorbar     */
+    canvas : canvas_2 ,         /* the canvas to draw on                */
+}) ;
+
+
 plot.init() ;   /* initialize the plot */
+plotsecond.init() ;
 plot.render() ;
+plotsecond.render() ;
 
-// marching steps ........................................................
-var fmarch = new Abubu.Solver({
-        fragmentShader : source( 'march' ) ,
-        uniforms : { 
-                inTexture   : { type : 't', value : fcolor      } ,
-                dt          : { type : 'f', value : env.dt      } ,
-                diffCoef    : { type : 'f', value : env.diffCoef} ,
-        } ,
-        targets : {
-                ocolor : { location : 0, target : scolor } 
+    // marching steps ........................................................
+    var fmarch = new Abubu.Solver({
+        fragmentShader: source('march'),
+        uniforms: {
+            inTexture: { type: 't', value: fcolor },
+            dt: { type: 'f', value: env.dt },
+            diffCoef: { type: 'f', value: env.diffCoef },
+        },
+        targets: {
+            ocolor: { location : 0, target : scolor }
         }
-    } ) ;
+    });
 
-var smarch = new Abubu.Solver({
+    var smarch = new Abubu.Solver({
+        fragmentShader: source('march'),
+        uniforms: {
+            inTexture: { type: 't', value: scolor },
+            dt: { type: 'f', value: env.dt },
+            diffCoef: { type: 'f', value: env.diffCoef },
+        },
+        targets: {
+            ocolor: { location : 0, target : fcolor }
+        }
+    });
+
+    var marchfirst = new Abubu.Solver({
+        fragmentShader: source('march'),
+        uniforms: {
+            inTexture: { type: 't', value: firstcolor },
+            dt: { type: 'f', value: env.dt },
+            diffCoef: { type: 'f', value: env.diffCoef },
+        },
+        targets: {
+            out2color: { location : 0, target : secondcolor }
+        }
+    });
+
+    var marchsecond = new Abubu.Solver({
         fragmentShader : source( 'march' ) ,
         uniforms : { 
-                inTexture   : { type : 't', value : scolor      } ,
+                inTexture   : { type : 't', value : secondcolor      } ,
                 dt          : { type : 'f', value : env.dt      } ,
                 diffCoef    : { type : 'f', value : env.diffCoef} ,
         } ,
         targets : {
-                ocolor : { location : 0, target : fcolor } 
+                out2color : { location : 0, target : firstcolor } 
         }
     } ) ;
 
@@ -167,6 +221,8 @@ var smarch = new Abubu.Solver({
 function march(){
     fmarch.render() ;
     smarch.render() ;
+    marchfirst.render() ;
+    marchsecond.render() ;
     env.time += env.dt*2. ;
 }
 
@@ -177,6 +233,7 @@ function run(){
             }
         }
         plot.render() ;
+        plotsecond.render() ;
         requestAnimationFrame(run) ;
 }
 
