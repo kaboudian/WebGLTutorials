@@ -7,9 +7,11 @@ in vec2 cc ;
 
 uniform float dt , diffCoef ;
 uniform float minVlt, maxVlt ;
+uniform float Ct_f, Ct_d ;
 
 
-uniform sampler2D   inColor1, inColor2 ;
+uniform sampler2D   inColor1, inColor2 ; // state variables
+
 uniform sampler2D   inTable1, inTable2 , inTable3, inTable4 ;
 
 layout (location = 0) out vec4 outColor1 ;
@@ -71,8 +73,8 @@ void main(){
     m = RushLarsen(m, m_inf, tau_m ) ;
     h = RushLarsen(h, h_inf, tau_h ) ;
     j = RushLarsen(j, j_inf, tau_j ) ;
-    d = RushLarsen(d, d_inf, tau_d ) ;
-    f = RushLarsen(f, f_inf, tau_f ) ;
+    d = RushLarsen(d, d_inf, tau_d*Ct_d ) ;
+    f = RushLarsen(f, f_inf, tau_f*Ct_f ) ;
     x1= RushLarsen(x1, x1_inf, tau_x1 ) ;
 
     // Calculating current ...............................................

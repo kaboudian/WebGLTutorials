@@ -100,7 +100,7 @@ function loadWebGL(){
         /* tau_h        */
         table[ p++ ] = 1.0/(a_h + b_h) ;
     }
-    env.table1 = new Abubu.Float32Texture( table, env.noSamples ) ;
+    env.table1 = new Abubu.TableTexture( table, env.noSamples, 1 ) ;
 
     
     /* j_inf, tau_j, d_inf, tau_d */
@@ -124,7 +124,7 @@ function loadWebGL(){
         /* tau_d        */
         table[ p++ ] = 1.0/(a_d+b_d) ;
     }
-    env.table2 = new Abubu.Float32Texture( table, env.noSamples ) ;
+    env.table2 = new Abubu.TableTexture( table, env.noSamples ) ;
 
     /* x1_inf, tau_x1, f_inf, tau_f */ 
     p = 0 ;
@@ -147,7 +147,7 @@ function loadWebGL(){
         /* tau_f */
         table[ p++ ] = 1.0/(a_f + b_f)  ;
     }
-    env.table3 = new Abubu.Float32Texture( table, env.noSamples ) ;
+    env.table3 = new Abubu.TableTexture( table, env.noSamples ) ;
 
     /* ikix */
     for(var i = 0; i<env.noSamples; i++){
@@ -167,8 +167,12 @@ function loadWebGL(){
         table[ indx+3 ] = 0.0 ;
     }
 
-    env.table4 = new Abubu.Float32Texture( table, env.noSamples ) ;
-
+  //  env.table4 = new Abubu.TableTexture( table, env.noSamples ) ;
+    env.table4 = new Abubu.Float32Texture( env.noSamples, 1, {
+            data : table ,
+            magFilter : 'linear', 
+            minFilter : 'linear' 
+    } ) ;
 /*------------------------------------------------------------------------
  * creating textures for time stepping 
  *------------------------------------------------------------------------
@@ -201,9 +205,10 @@ function loadWebGL(){
     }
     env.initialize() ;
 
-
     // compute solvers ...................................................
-    env.dt = 0.01 ;
+    env.dt = 0.05 ;
+    env.Ct_d = 1. ;
+    env.Ct_f = 1. ;
     var compUniforms = function(_c1,_c2){
         this.inColor1 = { type : 't', value : _c1 } ;
         this.inColor2 = { type : 't', value : _c2 } ;
@@ -215,6 +220,8 @@ function loadWebGL(){
         this.diffCoef = { type : 'f', value : 0.001 } ;
         this.minVlt   = { type : 'f', value : env.minVlt } ;
         this.maxVlt   = { type : 'f', value : env.maxVlt } ;
+        this.Ct_f   = { type : 'f', value : env.Ct_f } ;
+        this.Ct_d   = { type : 'f', value : env.Ct_d } ;
     } ;
     var compTargets = function(_c1, _c2 ){
         this.outColor1 = {location : 0 , target : _c1 } ;
@@ -236,7 +243,7 @@ function loadWebGL(){
     env.march = function(){
         env.fcomp.render() ;
         env.scomp.render() ;
-        env.time += env.dt ;
+        env.time += 2.*env.dt ;
     } ;
 
     // display ...........................................................
@@ -251,6 +258,32 @@ function loadWebGL(){
     env.disp.init() ;
 
     env.disp.render() ;
+
+    // click 
+    // click solver ..........................................................
+    var click = new Abubu.Solver({
+        fragmentShader : source( 'click' ) ,
+        uniforms : {
+            inTexture       : { type : 't', value  : env.fcolor1    } ,
+            clickRadius     : { type : 'f', value  : 0.1            } ,
+            clickPosition   : { type : 'v2', value : [0.5,0.5]      } ,
+        } ,
+        targets : {
+            ocolor : { location : 0 , target : env.scolor1 } ,
+        }
+    } ) ;
+    
+    var clickCopy = new Abubu.Copy( env.scolor1, env.fcolor1 ) ;
+    
+    var mouseDrag = new Abubu.MouseListener({
+        canvas : document.getElementById('canvas_1') ,
+        event : 'drag' ,
+        callback : function(e){
+            click.uniforms.clickPosition.value = e.position ;
+            click.render() ;
+            clickCopy.render() ;
+        }
+    } ) ; 
 
     // run sequence ......................................................
     env.skip = 30 ;
@@ -277,6 +310,16 @@ function createGui(){
     panel.add(env,'time').listen() ;
     panel.add(env,'skip') ;
     panel.add(env,'running') ;
-    
+
+    panel.add(env, 'Ct_f').onChange(function(){
+        env.fcomp.uniforms['Ct_f'].value = env.Ct_f ;
+        env.scomp.uniforms.Ct_f.value = env.Ct_f ;
+    } ) ;    
+    panel.add(env, 'Ct_d').onChange(function(){
+        Abubu.setUniformsInSolvers( ['Ct_d','Ct_f'], [env.Ct_d,env.Ct_f], 
+                [env.fcomp, env.scomp]) ;
+    } ) ;   
+
+    panel.add(env, 'initialize') ;
 }
 
