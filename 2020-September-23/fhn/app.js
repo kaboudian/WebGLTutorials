@@ -76,12 +76,14 @@ plot.init() ;   /* initialize the plot */
 plot.render() ;
 
 var splot = new Abubu.SignalPlot({
-    noPltPoints : 1024,
+    noPltPoints : 1024, // number of sample points
     grid : 'on', 
-    nx   : 10 ,
-    ny   : 15 ,
+    nx   : 10 , // number of division in x 
+    ny   : 15 , // ... in y 
+
     xticks : { mode : 'auto', unit : 'ms', font : '11pt Times' } ,
     yticks : { mode : 'auto', unit : '' , font : '12pt Times',precision : 1  } ,
+    
     canvas : canvas_2 
 } ) ;
 splot.addMessage(
@@ -95,11 +97,23 @@ env.usgn = splot.addSignal( fcolor, {
     minValue : -.3,
     maxValue : 1.2 ,
     restValue : 0 ,
-    color : [ 0.,0.,0.5 ],
+    color : [ 1.,0.,0.0 ],
     visible : true ,
     timewindow : 1000 , 
     probePosition : [0.5,0.5] 
 } ) ;
+
+env.vsgn = splot.addSignal( fcolor, {
+    channel : 'g',
+    minValue : -.3,
+    maxValue : 1.2 ,
+    restValue : 0 ,
+    color : [ 0.,1.,0.0 ],
+    visible : true ,
+    timewindow : 1000 , 
+    probePosition : [0.5,0.5] 
+} ) ;
+
 
 // initialize program ....................................................
 env.initialize = function(){
@@ -107,6 +121,7 @@ env.initialize = function(){
     init.render() ;
     splot.init() ;
     env.usgn.init(0) ;
+    env.vsgn.init(0) ;
     plot.init() ;
 }
 
@@ -158,6 +173,7 @@ function run(){
             for(var i = 0 ; i<env.skip ; i++){
                 march() ;
                 env.usgn.update(env.time) ;
+                env.vsgn.update(env.time) ;
             }
         }
         splot.render() ;
@@ -198,7 +214,6 @@ var setProbe = new Abubu.MouseListener({
     event  : 'click' ,
     shift  : true ,
     callback : function(e){
-        console.log(e) ;
         plot.setProbePosition(e.position) ;
         splot.setProbePosition(e.position) ;
         splot.init() ;
@@ -267,6 +282,7 @@ function addToGui(
         var param = paramList[i] ;
         elements[param] = guiElemenent.add(obj, param )  ;
         elements[param].onChange(function(){
+            console.log(this) ;
             Abubu.setUniformInSolvers( 
                     this.property , // this refers to the GUI element 
                     this.object[this.property] , 
@@ -288,7 +304,7 @@ function createGui(){
     // model parameters added to GUI -------------------------------------
     var mdl = panel.addFolder('Model Parameters') ;
     mdl.elements = addToGui( mdl, env, 
-            ['a','b','epsilon','dt','diffCoef'], 
+            ['a','b','epsilon','dt','diffCoef' ], 
             [fmarch, smarch] ) ;
 
     // pace maker --------------------------------------------------------
