@@ -20,6 +20,18 @@ The files and video recordings of the lectures will be regularly posted here.
 - Basic familiarity with computer coding preferably HTML, JavaScript and C programming
 - Having access to a text editor suitable for modifying computer code (Atom, Sublime, Notepad++, WinEdit, Bracket, VIM, EMACS)
 - Having access to a modern browser such as Google Chrome, Firefox, or similar (not Internet Explorer or Safari!)
+
+## Wednesday, September 23
+
+### Objectives
+1. Adding signal plots
+1. Adding further interactivity to the codes
+1. Terminating spiral waves using ATP with an interactive code
+1. Doing your own projects...
+
+You can download the necessary files for [September 23 session from here](./2020-September-23)
+
+
 ## Wednesday, September 16
 [![Wednesday, September 16](http://img.youtube.com/vi/_RPwsJTLclw/0.jpg)](http://www.youtube.com/watch?v=_RPwsJTLclw "Wednesday, September 16")
 
