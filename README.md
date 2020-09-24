@@ -22,6 +22,9 @@ The files and video recordings of the lectures will be regularly posted here.
 - Having access to a modern browser such as Google Chrome, Firefox, or similar (not Internet Explorer or Safari!)
 
 ## Wednesday, September 23
+[![Wednesday, September 23](http://img.youtube.com/vi/Qrxcezb22oU/0.jpg)](https://youtu.be/Qrxcezb22oU "Wednesday, September 23")
+
+[**^^ Watch the video lecture from the link above! ^^**](https://youtu.be/Qrxcezb22oU)
 
 ### Objectives
 1. Adding signal plots
