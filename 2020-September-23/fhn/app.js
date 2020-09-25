@@ -304,7 +304,7 @@ function createGui(){
     // model parameters added to GUI -------------------------------------
     var mdl = panel.addFolder('Model Parameters') ;
     mdl.elements = addToGui( mdl, env, 
-            ['a','b','epsilon','dt','diffCoef' ], 
+            ['a','b','epsilon','dt','diffCoef'], 
             [fmarch, smarch] ) ;
 
     // pace maker --------------------------------------------------------

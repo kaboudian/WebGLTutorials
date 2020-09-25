@@ -22,6 +22,10 @@ The files and video recordings of the lectures will be regularly posted here.
 - Having access to a modern browser such as Google Chrome, Firefox, or similar (not Internet Explorer or Safari!)
 
 ## Friday, September 25
+[![Friday, September 25](http://img.youtube.com/vi/OZ3EEHb-cxc/0.jpg)](http://www.youtube.com/watch?v=OZ3EEHb-cxc "Friday, September 25")
+
+[**^^ Watch the video lecture from the link above! ^^**](https://youtu.be/OZ3EEHb-cxc)
+
 
 ### Objectives
 1. Performing serial reduction operation on textured data
