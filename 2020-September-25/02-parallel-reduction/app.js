@@ -223,11 +223,10 @@ function run(){
             for(var i = 0 ; i<env.skip ; i++){
                 march() ;
                 env.usgn.update(env.time) ;
+                reduceS1.run() ;
+                reduceS2.run() ;
+                env.rsgn.update(env.time) ;
             }
-            reduceS1.run() ;
-            reduceS2.run() ;
-            env.rsgn.update(env.time) ;
-
         }
         
         splot.render() ;

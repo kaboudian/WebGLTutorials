@@ -16,5 +16,14 @@ void main(){
     float sum = 0. ;
     vec4 color ;
 
+    for(int i=0 ; i<isize.x ;i++){
+        for(int j=0; j<isize.y ; j++){
+            color = texelFetch( inTexture , ivec2(i,j), 0 ) ; 
+            if( u > 0.5 ){
+                sum += 1. ;
+            } 
+        }
+    }
+
     ocolor = vec4(sum/float(isize.x*isize.y)) ;
 }
