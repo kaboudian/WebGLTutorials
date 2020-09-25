@@ -21,6 +21,16 @@ The files and video recordings of the lectures will be regularly posted here.
 - Having access to a text editor suitable for modifying computer code (Atom, Sublime, Notepad++, WinEdit, Bracket, VIM, EMACS)
 - Having access to a modern browser such as Google Chrome, Firefox, or similar (not Internet Explorer or Safari!)
 
+## Friday, September 25
+
+### Objectives
+1. Performing serial reduction operation on textured data
+1. Using texelFetch
+1. Performing parallel reduction operations on texture data using multi-step reduction.
+1. Understanding the difference in performance of parallel vs. serial reductions.
+
+You can download the necessary files for [September 25 session from here](./2020-September-25)
+
 ## Wednesday, September 23
 [![Wednesday, September 23](http://img.youtube.com/vi/Qrxcezb22oU/0.jpg)](https://youtu.be/Qrxcezb22oU "Wednesday, September 23")
 
