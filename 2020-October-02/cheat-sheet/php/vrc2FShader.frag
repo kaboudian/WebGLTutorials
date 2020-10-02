@@ -120,7 +120,7 @@ vec4 noPhaseField(){
         if (sampledValue > threshold){
             sampledColor = vec4(scaledValue,0.,0., 0.5) ;
             sampledAlpha = alphaCorrection;
-            sampledColor = sampledColor*sampledLight;
+            sampledColor = sampledColor ; //*sampledLight;
         }else{
             sampledAlpha = 0. ;
         }

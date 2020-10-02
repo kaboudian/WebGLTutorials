@@ -160,8 +160,8 @@ var controler = new Abubu.OrbitalCameraControl(
 
 /* projectionMatrix */
 var projectionMatrix = Abubu.mat4.create() ;
-mat4.identity(      projectionMatrix        ) ;
-mat4.perspective (  projectionMatrix ,
+Abubu.mat4.identity(      projectionMatrix        ) ;
+Abubu.mat4.perspective (  projectionMatrix ,
                      Math.PI*0.1  , 1. ,
                     0.01 /*near field */, 100 /* far field */               ) ;
 
@@ -188,6 +188,7 @@ var pass1 = new Abubu.Solver({
             cullFacing      : true ,
             cullFace        : 'front',
             depthTest       : 'true',
+            clear : true ,
             renderTargets   : {
                 back_face_Crds : {
                     location :0 ,
@@ -343,7 +344,7 @@ function run(){
             }
         }
         controler.update() ;
-        Abubu.mat4.scale( viewMatrix, viewMatrix, [1,1,1,1] ) ;
+        //Abubu.mat4.scale( viewMatrix, viewMatrix, [1,1,1,1] ) ;
         pass1.setUniform('viewMatrix', viewMatrix) ;
         pass2.setUniform('viewMatrix', viewMatrix) ;
 
