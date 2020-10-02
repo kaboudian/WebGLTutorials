@@ -1,0 +1,928 @@
+<!doctype html>
+<html>
+<head>
+    <script src='http://abubujs.org/libs/Abubu.latest.js' 
+	    type='text/javascript'></script>        
+</head>
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- body of the html page                                             -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<body>
+    <canvas id=canvas_1 width=512 height=512>
+        Your browser doesn't support HTML5.0
+    </canvas>
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- All shaders included here (codes written in GLSL)                 -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- ***************************************************************** -->
+<script id='init' type='x-shader-fragment'>#version 300 es
+precision highp float ;
+precision highp int ;
+
+in vec2 cc, pixPos ;
+
+layout (location = 0) out vec4 color1 ;
+layout (location = 1) out vec4 color2 ;
+// Main body of the shader
+void main() {
+    vec4 color = vec4(0.) ;
+    
+    color1 = color ;
+    color2 = color ;
+    return ;
+}
+
+
+</script><!-- end of init shader's source code -->
+
+<!-- ***************************************************************** -->
+<script id='march' type='x-shader-fragment'>#version 300 es
+precision highp float ;
+precision highp int ;
+
+uniform sampler2D   inTexture ;
+uniform float       dt, diffCoef ;
+uniform float       period ;
+
+uniform int         mx, my, nx, ny ;
+
+in vec2 cc, pixPos ;
+
+layout (location = 0) out vec4 ocolor ;
+
+#define u       color.r
+#define v       color.g
+#define time    color.b
+
+/*-------------------------------------------------------------------------
+ * Get the voxel coordinate
+ *-------------------------------------------------------------------------
+ */
+vec3 getVC(vec2 c){
+    vec3 crd = vec3(0.) ;
+
+    crd.x = (c.x - floor(c.x * float(mx))/float(mx) ) * float(mx) ;
+    crd.y = (c.y - floor(c.y * float(my))/float(my) ) * float(my) ;
+
+    float sliceNo = floor(c.x *float(mx)) 
+                +   ( ( float(my) -1.0) - floor(c.y * float(my)) )*float(mx);
+
+    crd.z = sliceNo/(float(mx*my)-1.) ;
+    return crd ;
+}
+
+/*-------------------------------------------------------------------------
+ * Get Pixel Coordinate of a Voxel
+ *-------------------------------------------------------------------------
+ */
+vec2 getPC(vec3 crd){
+    vec2 c ; 
+    
+    int wd      = mx*my-1 ;
+    int sliceNo = int( floor(crd.z*float(mx*my))) ;
+    int m_y     = (wd - sliceNo)/mx ; // how many slices in the positive vertical direction of the picture 
+    int m_x     = sliceNo%mx ; // how many slices in the horizontal direction
+
+    c.x = (float(m_x)+crd.x)/float(mx) ; // pixel coordinate x
+    c.y = (float(m_y)+crd.y)/float(my) ; // pixel coordinate y
+    return c ; 
+}
+
+/*-------------------------------------------------------------------------
+ * Get the texture value based on the voxel coordinate
+ *-------------------------------------------------------------------------
+ */
+vec4 Texture3D(sampler2D inText, vec3 crd){
+    vec3 c = crd ;
+
+    c.x = (c.x > 0.) ? c.x : -c.x ;
+    c.y = (c.y > 0.) ? c.y : -c.y ;
+    c.z = (c.z > 0.) ? c.z : -c.z ;
+
+    c.x = (c.x < 1.) ? c.x : 2.-c.x ;
+    c.y = (c.y < 1.) ? c.y : 2.-c.y ;
+    c.z = (c.z < 1.) ? c.z : 2.-c.z ;
+
+    return texture(inText, getPC(c)) ;
+
+}
+// Main body of the shader
+void main() {
+    vec2  size  = vec2(textureSize(inTexture, 0)) ;
+    float dx    = 4./float(nx) ;
+
+    vec3 CC = getVC(cc) ;
+    vec3 ii = vec3(1.,0.,0.)/float(nx) ;
+    vec3 jj = vec3(0.,1.,0.)/float(ny) ;
+    vec3 kk = vec3(0.,0.,1.)/(float(mx*my)) ;
+
+    // read the color of the pixel .......................................
+    vec4 color = texture( inTexture , cc ) ;
+
+    // if ( length(CC)<0.5 ) u = 1. ;
+    
+    vec4 laplacian = 
+        Texture3D( inTexture, CC + ii )
+     +  Texture3D( inTexture, CC - ii )
+     +  Texture3D( inTexture, CC + jj )
+     +  Texture3D( inTexture, CC - jj )
+     +  Texture3D( inTexture, CC + kk )
+     +  Texture3D( inTexture, CC - kk )
+     -6.*color ;
+    ;
+    u += dt*diffCoef*laplacian.r/(dx*dx) ;
+
+    // gate time derivatives for FHN .......................................
+    float a = 0.1 ;
+    float b = 0.3 ;
+    float epsilon = 0.01 ;
+
+    float du2dt = u*(1.-u)*(u-a) - v ;
+    float dv2dt = epsilon*(b*u-v) ;
+
+    // marching gates
+    u += du2dt*dt ;
+    v += dv2dt*dt ;
+
+    // pacing algorithm
+    time += dt ;
+    if ( time > period ){
+        if(length(CC) <0.1){
+            u = 1. ;
+        }
+        time = 0. ;
+    }
+
+    // output the color of the pixel .....................................
+    ocolor = color ;
+    return ;
+}
+
+</script><!-- end of march shader's source code -->
+
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- Volume Ray Casting Related Shaders                                 -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+
+
+<!-- ***************************************************************** -->
+<script id='vrcCrdShader' type='x-shader-fragment'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * vrcCrdShader :   calculates the coordinate of each point in 3d
+ *
+ * PROGRAMMER   :   ABOUZAR KABOUDIAN
+ * DATE         :   Mon 14 Aug 2017 10:35:08 AM EDT
+ * PLACE        :   Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+precision highp float; precision highp int;
+
+/*------------------------------------------------------------------------
+ * Interface Vars.
+ *------------------------------------------------------------------------
+ */
+in      vec2        pixPos ;
+uniform float       mx, my ;
+
+/*------------------------------------------------------------------------
+ * Output
+ *------------------------------------------------------------------------
+ */
+layout (location = 0 ) out vec4  crd ;
+
+/*========================================================================
+ * main body 
+ *========================================================================
+ */
+void main(){
+    crd = vec4(1.0) ;
+
+    crd.x = (pixPos.x - floor(pixPos.x * mx)/mx ) * mx ;
+    crd.y = (pixPos.y - floor(pixPos.y * my)/my ) * my ;
+
+    float sliceNo = floor(pixPos.x * mx) 
+                +   ( ( my-1.0) - floor(pixPos.y * my) )*mx ;
+    crd.z = sliceNo/(mx*my) ;
+}
+
+
+</script><!-- end of vrcCrdShader shader's source code -->
+
+<!-- ***************************************************************** -->
+<script id='vrcLgtShader' type='x-shader-fragment'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * vrcLgtShader :   shading the light on the structure
+ *
+ * PROGRAMMER   :   ABOUZAR KABOUDIAN
+ * DATE         :   Mon 14 Aug 2017 11:01:43 AM EDT
+ * PLACE        :   Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+precision highp float; precision highp int;
+
+/*------------------------------------------------------------------------
+ * interface vars.
+ *------------------------------------------------------------------------
+ */
+const   int         MAX_NO = 100 ;
+in      vec2        pixPos ;
+
+uniform sampler2D   crdtTxt ;
+uniform sampler2D   target  ;
+
+uniform float       mx, my ;
+
+uniform vec3        dfls[ MAX_NO ] ;        /* directional flood lights */
+uniform int         noDfls ;                /* number of D.F.L's        */
+uniform vec3        ptls[ MAX_NO ] ;        /* point lights             */
+uniform int         noPtls ;                /* number of P.L's          */
+
+uniform float       threshold , minValue, maxValue;
+uniform vec4        channelMultiplier ;
+uniform float       alphaCorrection ;
+
+uniform float       lightShift ;
+/*------------------------------------------------------------------------
+ * output
+ *------------------------------------------------------------------------
+ */
+layout (location = 0) out vec4 light ;
+
+/*=========================================================================
+ * Acts like a texture3D using Z slices and trilinear filtering
+ *=========================================================================
+ */
+vec4 Texture3D( sampler2D S, vec3 texCoord )
+{
+    vec4    vColor ;
+    float x, y ;
+    float wd = mx*my - 1.0 ;
+
+    float zSliceNo  = floor( texCoord.z*mx*my) ;
+
+    x = texCoord.x / mx ;
+    y = texCoord.y / my ;
+
+    x += (mod(zSliceNo,mx)/mx) ;
+    y += floor((wd-zSliceNo)/ mx )/my ;
+
+    vColor = texture( S,  vec2(x,y) ) ;
+    return vColor ;
+}
+
+/*========================================================================
+ * floodLightCast
+ *========================================================================
+ */
+vec4 floodLightIntensity( vec3 DFL, vec3 pp, sampler2D S ){
+    vec4    tc ;
+    float   tv ;
+    float   aa ;
+    float   a ;
+    float   tr ;
+    vec3 ld = DFL ;
+    ld = ld/length(ld) ;
+
+    vec3 dl = ld/200. ;
+    vec3 lcp = pp + ld  ;
+    aa = 0. ;
+    for( int i=0; i < 100 ; i++){
+        tc = Texture3D( S, lcp ) ;
+        tv = dot( tc , channelMultiplier ) ;
+        if (tv >threshold ){
+            a = (tv-minValue)/
+                (maxValue-minValue) ;
+            aa += a * alphaCorrection  ;
+        }
+        lcp -= dl ;
+        if ( aa >= 1.0 ){
+            aa = 1.0 ;
+            break ;
+        }
+    }
+    return vec4(1.-aa) ;
+}
+
+/*========================================================================
+ * pointLightIntensity
+ *========================================================================
+ */ 
+vec4 pointLightIntensity( vec3 PTL, vec3 pp, sampler2D S){
+    vec4    tc ;
+    float   tv ;
+    float   aa ;
+    float   a ;
+    float   tr ;
+    vec3 ld = PTL-pp ;
+    ld = ld/length(ld) ;
+
+    vec3 dl = ld/120. ;
+    vec3 lcp = pp ;
+    aa = 0. ;
+    tr = alphaCorrection ;
+    for( int i=0; i < 120 ; i++){
+        tc = Texture3D( S, lcp ) ;
+        tv = dot( tc , channelMultiplier ) ;
+        if ( tv > threshold ){
+            a = (tv-minValue)/
+                (maxValue-minValue) ;
+        
+            aa += a * tr ;
+        }
+        lcp += dl ;
+        if ( aa >= 1.0 ){
+            aa = 1.0 ;
+            break ;
+        }
+    }
+    return vec4(1.-aa) ;
+}
+
+
+/*========================================================================
+ * main body
+ *========================================================================
+ */
+void main(){
+    light = vec4(0.) ;
+    vec3 crd = texture( crdtTxt, pixPos ).rgb ;
+
+    for (int i=0 ; i < noDfls; i++){
+        light += floodLightIntensity( dfls[i], crd, target ) ;
+    }
+    for (int i=0 ; i < noPtls; i++){
+        light += pointLightIntensity( ptls[i], crd, target ) ;
+    }
+
+    light = light/float(noDfls + noPtls);
+
+    light = (light+lightShift)/(1.+lightShift) ;
+}
+
+
+</script><!-- end of vrcLgtShader shader's source code -->
+
+<!-- ***************************************************************** -->
+<script id='vrc1VShader' type='x-shader-vertex'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * vrc1VShader  :   1st Pass Vertex Shader of Volume-Ray-Casting
+ *
+ * PROGRAMMER   :   ABOUZAR KABOUDIAN
+ * DATE         :   Sat 12 Aug 2017 06:24:44 PM EDT
+ * PLACE        :   Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+precision highp float; precision highp int;
+
+
+/*------------------------------------------------------------------------
+ * Interface vars.
+ *------------------------------------------------------------------------
+ */
+in  vec3        position ;
+out vec3        worldSpaceCoords;
+
+
+uniform mat4 viewMatrix ;
+uniform mat4 modelMatrix ;
+uniform mat4 projectionMatrix ;
+
+/*========================================================================
+ * Main
+ *========================================================================
+ */
+void main()
+{
+    //Set the world space coordinates of the back faces vertices as output.
+    worldSpaceCoords = position ; 
+    gl_Position = 
+        projectionMatrix*viewMatrix*modelMatrix*vec4( position, 1.0 );
+
+}
+
+</script><!-- end of vrc1VShader shader's source code -->
+
+<!-- ***************************************************************** -->
+<script id='vrc1FShader' type='x-shader-fragment'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * vrc1FShader  :   First Pass of Volume Ray Casting
+ *
+ * PROGRAMMER   :   ABOUZAR KABOUDIAN
+ * DATE         :   Sat 12 Aug 2017 06:24:26 PM EDT
+ * PLACE        :   Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+precision highp float; precision highp int;
+
+/*------------------------------------------------------------------------
+ * Interface Vars.
+ *------------------------------------------------------------------------
+ */
+in vec3 worldSpaceCoords;
+
+out vec4 back_face_Crds ;
+/*========================================================================
+ * Main
+ *========================================================================
+ */
+void main()
+{
+    // Sets the fragment color as the fragment coordinates.
+    back_face_Crds = vec4(   worldSpaceCoords, 1.0   ) ;
+}
+
+</script><!-- end of vrc1FShader shader's source code -->
+
+<!-- ***************************************************************** -->
+<script id='vrc2VShader' type='x-shader-vertex'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * vrc2VShader  :   2nd Pass Vertex Shader for Volume-Ray-Casting
+ *
+ * PROGRAMMER   :   ABOUZAR KABOUDIAN
+ * DATE         :   Sat 12 Aug 2017 06:25:12 PM EDT
+ * PLACE        :   Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+precision highp float; precision highp int;
+
+/*------------------------------------------------------------------------
+ * Interface vars.
+ *------------------------------------------------------------------------
+ */
+in      vec3        position ;
+
+out     vec3        worldSpaceCoords ;
+out     vec4        projectedCoords ;
+
+uniform mat4        viewMatrix ;
+uniform mat4        modelMatrix ;
+uniform mat4        projectionMatrix ;
+
+/*========================================================================
+ * Main
+ *========================================================================
+ */
+void main()
+{
+    worldSpaceCoords    =   position ; 
+    
+    projectedCoords     =   projectionMatrix 
+                        *   viewMatrix
+                        *   modelMatrix 
+                        *   vec4( position, 1.0 ) ;
+
+    gl_Position = projectedCoords ;
+}
+
+</script><!-- end of vrc2VShader shader's source code -->
+
+<!-- ***************************************************************** -->
+<script id='vrc2FShader' type='x-shader-fragment'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * vrc2FShader  :   2nd Pass Fragment Shader for Volume-Ray-Casting
+ *
+ * PROGRAMMER   :   ABOUZAR KABOUDIAN
+ * DATE         :   Wed 28 Nov 2018 12:16:39 (EST) 
+ * PLACE        :   Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+precision highp float; precision highp int;
+
+/*------------------------------------------------------------------------
+ * Interface vars.
+ *------------------------------------------------------------------------
+ */
+in      vec3        worldSpaceCoords;
+in      vec4        projectedCoords;
+uniform sampler2D   backfaceCrdTxt;
+uniform sampler2D   phaseTxt ;
+uniform sampler2D   target ;
+uniform sampler2D   compMap ;
+uniform sampler2D   lightTxt ;
+uniform sampler2D   clrm ;
+uniform bool        rayCast ;
+uniform bool        usePhaseField , useCompMap ;
+uniform bool        drawFilament, showXCut, showYCut, showZCut ;
+uniform sampler2D   flmt ;
+uniform float       xLevel, yLevel, zLevel ;
+uniform vec4        filamentColor ;
+uniform float       minValue, maxValue, threshold ;
+uniform vec4        channelMultiplier ;
+
+uniform int         noSteps ;
+uniform float       alphaCorrection ;
+
+uniform float       mx, my ;
+uniform float       lightShift ;
+uniform float       structural_alpha ;
+
+out     vec4        FragColor ;
+
+/*========================================================================
+ * Acts like a texture3D using Z slices and trilinear filtering
+ *========================================================================
+ */
+/*------------------------------------------------------------------------
+ * Texture3D
+ *------------------------------------------------------------------------
+ */
+vec4 Texture3D( sampler2D S, vec3 texCoord )
+{
+    vec4    vColor1, vColor2 ;
+    float x, y ;
+    float wd = mx*my - 1.0 ;
+
+    float zSliceNo  = floor( texCoord.z*mx*my) ;
+
+    x = texCoord.x / mx ;
+    y = texCoord.y / my ;
+
+    x += (mod(zSliceNo,mx)/mx) ;
+    y += floor((wd-zSliceNo)/ mx )/my ;
+
+    vColor1 = texture( S,  vec2(x,y) ) ;
+
+    zSliceNo = ceil( texCoord.z*mx*my) ;
+
+    x = texCoord.x / mx ;
+    y = texCoord.y / my ;
+
+    x += (mod(zSliceNo,mx)/mx) ;
+    y += floor((wd-zSliceNo)/ mx )/my ;
+    vColor2 = texture( S,  vec2(x,y) ) ;
+
+    return mix(
+        vColor2,
+        vColor1,
+        zSliceNo/(mx*my)-texCoord.z
+    ) ;
+}
+
+/*------------------------------------------------------------------------
+ * CompTexture3D
+ *------------------------------------------------------------------------
+ */
+vec4 CompTexture3D( sampler2D S, vec3 texCoord )
+{
+    vec4    vColor1, vColor2 ;
+    float   x, y ;
+    float   wd = mx*my - 1.0 ;
+
+    float zSliceNo  = floor( texCoord.z*mx*my) ;
+
+    x = texCoord.x / mx ;
+    y = texCoord.y / my ;
+
+    x += (mod(zSliceNo,mx)/mx) ;
+    y += floor((wd-zSliceNo)/ mx )/my ;
+
+    vColor1 = texture(
+        S,
+        texture(compMap, vec2(x,y)).xy
+    ) ;
+
+    zSliceNo = ceil( texCoord.z*mx*my) ;
+
+    x = texCoord.x / mx ;
+    y = texCoord.y / my ;
+
+    x += (mod(zSliceNo,mx)/mx) ;
+    y += floor((wd-zSliceNo)/ mx )/my ;
+
+    vColor2 = texture(
+        S,
+        texture(compMap, vec2(x,y)).xy
+    ) ;
+
+    return mix(
+        vColor2,
+        vColor1,
+        zSliceNo/(mx*my)-texCoord.z
+    ) ;
+}
+
+
+const float SQRT3 = sqrt(1.) ;
+
+/*========================================================================
+ * noPhaseField
+ *========================================================================
+ */
+vec4 noPhaseField(){
+    // getting the projected coordiante of the texture on the screen
+    vec2 texc = ((projectedCoords.xy/projectedCoords.w) + vec2(1.))*0.5 ;
+
+    // getting position on the back face of the cube
+    vec3    backCrd = texture( backfaceCrdTxt, texc).xyz ;
+
+    // coordinate of the front face
+    vec3    frontCrd = worldSpaceCoords ;
+
+    // direction vector from front to back
+    vec3    ray     = backCrd - frontCrd ;
+    float   rayLength   = length(ray) ;
+
+    // marching vectors for ray casting
+    float   marchLength = rayLength / float(noSteps) ;
+    vec3    marchRay    = normalize(ray)*marchLength ;
+
+    vec3    currentCrd  = frontCrd ;
+
+    // Accumulated values during ray casting march
+    vec4    accumulatedColor    = vec4(0.);
+    float   accumulatedAlpha    = 0. ;
+    float   accumulatedLength   = 0. ;
+
+    // Sampled Values
+    vec4    sampledTarget ;
+    float   sampledValue ;
+    float   scaledValue ;
+    vec4    sampledColor ;
+    float   sampledAlpha ;
+    float   sampledLight ;
+
+    // Ray marching loop
+    for(int i=0 ; i < noSteps; i++){
+        sampledTarget   = Texture3D( target ,   currentCrd ) ;
+        sampledValue    = dot(sampledTarget, channelMultiplier ) ;
+        scaledValue     = (sampledValue-minValue)
+                        / (maxValue - minValue) ;
+        sampledLight = Texture3D( lightTxt , currentCrd ).r ;
+        if (sampledValue > threshold){
+            sampledColor = texture( clrm, vec2(scaledValue, 0.5)) ;
+            sampledAlpha = alphaCorrection;
+            sampledColor = sampledColor*sampledLight;
+        }else{
+            sampledAlpha = 0. ;
+        }
+        sampledAlpha = scaledValue*alphaCorrection ;
+
+        accumulatedColor    += (1.-accumulatedAlpha)
+                            *   sampledColor
+                            *   sampledAlpha ;
+        accumulatedAlpha += sampledAlpha ;
+        accumulatedColor.a = accumulatedAlpha ;
+
+        currentCrd += marchRay ;
+        accumulatedLength += marchLength ;
+
+        if ( accumulatedAlpha >= 1.0 || accumulatedLength> rayLength){
+            accumulatedAlpha = 1.0 ;
+            break ;
+        }
+    }
+    return accumulatedColor ;
+}
+
+/*========================================================================
+ * Main body of pass2Shader
+ *========================================================================
+ */
+void main( void ) {
+    FragColor = noPhaseField() ;
+}
+
+</script><!-- end of vrc2FShader shader's source code -->
+
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- main script - JavaScript code                                     -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script>
+// get the shader source by its id ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function source(id){
+    return document.getElementById(id).text ;
+}
+
+// Get the canvas ........................................................
+var canvas_1 = document.getElementById('canvas_1') ;
+
+// Object to be used for interactions ....................................
+var env = {
+        dt          : 0.05 ,
+        diffCoef    : 0.001 ,
+        time        : 0 ,
+        running     : false ,
+        skip        : 20 ,
+        period      : 200 ,
+        nx : 64 ,   // resolution in x-direction
+        ny : 64 ,   // resolution in y-direction
+        mx : 8 ,    // the number of z-slices in horizontal direction
+        my : 8 ,    // the number of z-slices in the vertical direction
+    } ;
+
+env.width   = env.nx*env.mx ;
+env.height  = env.ny*env.my ;
+
+// defining the textures .................................................
+var fcolor = new Abubu.Float32Texture(env.width,env.height) ;
+var scolor = new Abubu.Float32Texture(env.width,env.height) ;
+
+// Setup a solver ........................................................
+var init = new Abubu.Solver( {
+    fragmentShader  : source('init'),
+    targets : {
+        color1 : { location :0, target : fcolor  } ,
+        color2 : { location :1, target : scolor  } ,
+
+    }
+} ) ;
+init.render() ;
+
+// post processing .......................................................
+/*========================================================================
+ * volume ray casting 
+ *========================================================================
+ */ 
+
+// coordinates ...........................................................
+var crdtTxt = new Abubu.Float32Texture( env.width, env.height ) ;
+var crdt = new Abubu.Solver({
+    fragmentShader : source( 'vrcLgtShader' ) ,
+    uniforms : { 
+        mx : { type : 'f', value : env.mx } ,
+        my : { type : 'f', value : env.my } ,
+    } ,
+    targets: { 
+        crd : { location : 0, target : crdtTxt } ,
+    }
+} ) ;
+crdt.render() ;
+
+var lightTxt = new Abubu.Float32Texture( env.width, env.height ) ;
+var light = new Abubu.Solver({
+    fragmentShader : source( 'vrcLgtShader' ) ,
+    uniforms : { 
+        crdtTxt : { type : 't', value : crdtTxt } ,
+        target  : { type : 't', value : fcolor  } ,
+        mx : { type : 'f', value :env.mx } ,
+        my : { type : 'f', value :env.my } ,
+        minValue : { type : 'f', value : 0.01  } ,
+        maxValue : { type : 'f', value : 1.1   } ,
+        threshold : { type :'f', value : 0.5 } ,
+        dfls : { type : 'f3v' , value : [
+                        1.,1.,1.,
+                        0.,0.,1,
+                        -1,0.,0,
+                        0,1,0,
+                        0,-1,0,] } ,
+        noDfls : { type : 'i', value : 5 } ,
+        noPtls : { type : 'i', value : 0 } ,
+        alphaCorrection : { type : 'f', value : 0.15 } ,
+        channelMultiplier : {type : 'v4', value : [1.,0.,0.,0.] } ,
+        lightShif : { type : 'f', value : 0. } ,
+    } ,
+    targets : {
+        light : { location : 0 , target : lightTxt } ,
+    }
+} ) ;
+light.render() ;
+var cubeGeometry    = new Abubu.UnitCubeGeometry() ;
+var frameGeometry   = {
+    vertices : [
+            0,0,0,
+            0,0,1,
+
+            0,0,0,
+            1,0,0,
+
+            1,0,0,
+            1,0,1,
+
+            1,0,0,
+            1,1,0,
+
+            1,1,0,
+            1,1,1,
+
+            1,1,0,
+            0,1,0,
+
+            0,1,0,
+            0,0,0,
+
+            0,1,0,
+            0,1,1,
+
+            0,0,1,
+            1,0,1,
+
+            1,0,1,
+            1,1,1,
+
+            1,1,1,
+            0,1,1,
+
+            0,1,1,
+            0,0,1,
+
+            ] ,
+        noCoords : 3 ,
+        premitive : 'lines' ,
+} ;
+
+
+var plot = new Abubu.VolumeRayCaster({
+    target : fcolor ,
+    channel : 'r' ,
+    mx : env.mx ,
+    my : env.my ,
+    noSteps : 100 ,
+    alphaCorrection : 0.15 ,
+    minValue  : 0.01 ,
+    maxValue  : 1.1 ,
+    threshold : 0.5 ,
+    scale : 0.7 ,
+    canvas : canvas_1,
+    floodLights     : [1.,1.,1.,
+                       0.,0.,1,
+                       -1,0.,0,
+                       0,1,0,
+                       0,-1,0,],
+
+    } ) ;
+plot.initForeground() ;   /* initialize the plot */
+plot.render() ;
+
+// marching steps ........................................................
+function marchUniforms(_inTexture ){
+    this.inTexture   = { type : 't', value : _inTexture     } ;
+    this.dt          = { type : 'f', value : env.dt         } ;
+    this.diffCoef    = { type : 'f', value : env.diffCoef   } ;
+    this.period      = { type : 'f', value : env.period     } ;
+    this.nx          = { type : 'i', value : env.nx         } ;
+    this.ny          = { type : 'i', value : env.ny         } ;
+    this.mx          = { type : 'i', value : env.mx         } ;
+    this.my          = { type : 'i', value : env.my         } ;
+    
+    return this ;
+}
+
+var fmarch = new Abubu.Solver({
+        fragmentShader : source( 'march' ) ,
+        uniforms : new marchUniforms( fcolor ),
+        targets : {
+                ocolor : { location : 0, target : scolor } 
+        }
+    } ) ;
+
+var smarch = new Abubu.Solver({
+        fragmentShader : source( 'march' ) ,
+        uniforms : new marchUniforms( scolor ) ,
+        targets : {
+                ocolor : { location : 0, target : fcolor } 
+        }
+} ) ;
+
+// march the solution for two time steps
+function march(){
+    fmarch.render() ;
+    smarch.render() ;
+    env.time += env.dt*2. ;
+}
+
+// running sequence ......................................................
+function run(){
+        if (env.running){
+            for(var i = 0 ; i< env.skip ; i++){
+                march() ;
+            }
+        }
+        plot.render() ;
+        requestAnimationFrame(run) ;
+}
+
+// create the graphical user interface ...................................
+function createGui(){
+    var gui = new Abubu.Gui() ;     /*  create a graphical user 
+                                        interface               */
+    var panel = gui.addPanel() ;    /*  add a panel to the GUI  */
+    panel.add(env,'time').listen() ;
+    panel.add(env,'skip') ;
+    panel.add(env,'running') ;
+    
+    panel.add(env,'dt').step(0.001).onChange(function(){
+        // send the information to GPU
+        fmarch.uniforms.dt.value = env.dt ;
+        smarch.uniforms.dt.value = env.dt ;
+    } ) ;
+
+    panel.add(env,'period').step(5).onChange(function(){
+        // send the information to GPU
+        fmarch.uniforms.period.value = env.period ;
+        smarch.uniforms.period.value = env.period ;
+    } ) ;
+
+}
+
+/* run createGui to create the graphical user interface     */
+createGui() ;
+
+run() ;
+</script>
+
+</body>
+</html>
