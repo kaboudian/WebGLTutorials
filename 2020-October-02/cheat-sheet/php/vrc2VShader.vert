@@ -7,7 +7,8 @@
  * PLACE        :   Chaos Lab @ GaTech, Atlanta, GA
  *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
  */
-precision highp float; precision highp int;
+precision highp float; 
+precision highp int;
 
 /*------------------------------------------------------------------------
  * Interface vars.

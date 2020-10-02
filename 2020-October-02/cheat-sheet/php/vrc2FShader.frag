@@ -15,18 +15,11 @@ precision highp float; precision highp int;
  */
 in      vec3        worldSpaceCoords;
 in      vec4        projectedCoords;
+
 uniform sampler2D   backfaceCrdTxt;
-uniform sampler2D   phaseTxt ;
 uniform sampler2D   target ;
-uniform sampler2D   compMap ;
 uniform sampler2D   lightTxt ;
 uniform sampler2D   clrm ;
-uniform bool        rayCast ;
-uniform bool        usePhaseField , useCompMap ;
-uniform bool        drawFilament, showXCut, showYCut, showZCut ;
-uniform sampler2D   flmt ;
-uniform float       xLevel, yLevel, zLevel ;
-uniform vec4        filamentColor ;
 uniform float       minValue, maxValue, threshold ;
 uniform vec4        channelMultiplier ;
 
@@ -35,7 +28,6 @@ uniform float       alphaCorrection ;
 
 uniform float       mx, my ;
 uniform float       lightShift ;
-uniform float       structural_alpha ;
 
 out     vec4        FragColor ;
 
@@ -78,50 +70,6 @@ vec4 Texture3D( sampler2D S, vec3 texCoord )
         zSliceNo/(mx*my)-texCoord.z
     ) ;
 }
-
-/*------------------------------------------------------------------------
- * CompTexture3D
- *------------------------------------------------------------------------
- */
-vec4 CompTexture3D( sampler2D S, vec3 texCoord )
-{
-    vec4    vColor1, vColor2 ;
-    float   x, y ;
-    float   wd = mx*my - 1.0 ;
-
-    float zSliceNo  = floor( texCoord.z*mx*my) ;
-
-    x = texCoord.x / mx ;
-    y = texCoord.y / my ;
-
-    x += (mod(zSliceNo,mx)/mx) ;
-    y += floor((wd-zSliceNo)/ mx )/my ;
-
-    vColor1 = texture(
-        S,
-        texture(compMap, vec2(x,y)).xy
-    ) ;
-
-    zSliceNo = ceil( texCoord.z*mx*my) ;
-
-    x = texCoord.x / mx ;
-    y = texCoord.y / my ;
-
-    x += (mod(zSliceNo,mx)/mx) ;
-    y += floor((wd-zSliceNo)/ mx )/my ;
-
-    vColor2 = texture(
-        S,
-        texture(compMap, vec2(x,y)).xy
-    ) ;
-
-    return mix(
-        vColor2,
-        vColor1,
-        zSliceNo/(mx*my)-texCoord.z
-    ) ;
-}
-
 
 const float SQRT3 = sqrt(1.) ;
 
@@ -170,7 +118,7 @@ vec4 noPhaseField(){
                         / (maxValue - minValue) ;
         sampledLight = Texture3D( lightTxt , currentCrd ).r ;
         if (sampledValue > threshold){
-            sampledColor = texture( clrm, vec2(scaledValue, 0.5)) ;
+            sampledColor = vec4(scaledValue,0.,0., 0.5) ;
             sampledAlpha = alphaCorrection;
             sampledColor = sampledColor*sampledLight;
         }else{

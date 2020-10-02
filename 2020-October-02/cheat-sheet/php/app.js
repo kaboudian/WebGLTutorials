@@ -130,28 +130,173 @@ var frameGeometry   = {
         premitive : 'lines' ,
 } ;
 
+var modelMatrix = Abubu.mat4.create() ;
+Abubu.mat4.identity(  modelMatrix                   ) ;
+Abubu.mat4.rotate(  modelMatrix, modelMatrix,
+                    -Math.PI/2.,[1.,0.,0.]          ) ;
 
-var plot = new Abubu.VolumeRayCaster({
-    target : fcolor ,
-    channel : 'r' ,
-    mx : env.mx ,
-    my : env.my ,
-    noSteps : 100 ,
-    alphaCorrection : 0.15 ,
-    minValue  : 0.01 ,
-    maxValue  : 1.1 ,
-    threshold : 0.5 ,
-    scale : 0.7 ,
-    canvas : canvas_1,
-    floodLights     : [1.,1.,1.,
-                       0.,0.,1,
-                       -1,0.,0,
-                       0,1,0,
-                       0,-1,0,],
+Abubu.mat4.translate(   modelMatrix, modelMatrix,
+                        [-0.5,-0.5,-0.5]            ) ;
 
-    } ) ;
-plot.initForeground() ;   /* initialize the plot */
-plot.render() ;
+/* viewMatrix   */
+var viewMatrix = mat4.create() ;
+
+Abubu.mat4.rotate(    viewMatrix, viewMatrix,
+                Math.PI/2.0,[1,1,1]         ) ;
+
+Abubu.mat4.identity(  viewMatrix                  ) ;
+
+Abubu.mat4.lookAt(    viewMatrix,
+                [2,2,2],[0,0,0],[0,1,0]     ) ;
+
+var controler = new Abubu.OrbitalCameraControl(
+    viewMatrix,
+    4.0 , canvas_1 ,
+    {
+        prevx: -.4,
+        prevy: 0.4,
+    }
+) ;
+
+/* projectionMatrix */
+var projectionMatrix = Abubu.mat4.create() ;
+mat4.identity(      projectionMatrix        ) ;
+mat4.perspective (  projectionMatrix ,
+                     Math.PI*0.1  , 1. ,
+                    0.01 /*near field */, 100 /* far field */               ) ;
+
+// screen size
+var backfaceCrdTxt = new Abubu.Float32Texture( 512, 512 ) ;
+var pass1 = new Abubu.Solver({
+            vertexShader    : source( 'vrc1VShader' ),
+            fragmentShader  : source( 'vrc1FShader' ) ,
+            uniforms : {
+                modelMatrix : {
+                    type    : 'mat4',
+                    value   : modelMatrix
+                } ,
+                viewMatrix  : {
+                    type    : 'mat4',
+                    value   : viewMatrix
+                } ,
+                projectionMatrix : {
+                    type    : 'mat4',
+                    value   : projectionMatrix
+                } ,
+            } ,
+            geometry        : cubeGeometry ,
+            cullFacing      : true ,
+            cullFace        : 'front',
+            depthTest       : 'true',
+            renderTargets   : {
+                back_face_Crds : {
+                    location :0 ,
+                    target  : backfaceCrdTxt
+                } ,
+            } ,
+} ) ;
+
+var pass2 = new Abubu.Solver({
+            vertexShader    : source('vrc2VShader') ,
+            fragmentShader  : source('vrc2FShader') ,
+            uniforms    : {
+                modelMatrix : {
+                    type    : 'mat4',
+                    value   : modelMatrix
+                } ,
+                viewMatrix  : {
+                    type    : 'mat4',
+                    value   : viewMatrix
+                } ,
+                projectionMatrix : {
+                    type    : 'mat4',
+                    value   : projectionMatrix
+                } ,
+                backfaceCrdTxt : {
+                    type    : 's',
+                    value   : backfaceCrdTxt ,
+                    minFilter : 'nearest' ,
+                    magFilter : 'nearest' ,
+                    wrapS   : 'clamp_to_edge' ,
+                    wrapT   : 'clamp_to_edge' ,
+                } ,
+                target      : {
+                    type    : 's',
+                    value   : fcolor ,
+                    minFilter: 'nearest',
+                    magFilter: 'nearest',
+                } ,
+                lightTxt    : {
+                    type    : 't' ,
+                    value   : lightTxt ,
+                } ,
+                minValue    : {
+                    type    : 'f',
+                    value   : 0.5
+                } ,
+                maxValue    : {
+                    type    : 'f',
+                    value   : 1.1
+                } ,
+                threshold   : {
+                    type    : 'f',
+                    value   : 0.5
+                } ,
+                channelMultiplier: {
+                    type    : 'v4',
+                    value   : [1.,0.,0.,0.] ,
+                } ,
+                alphaCorrection : {
+                    type    : 'f',
+                    value   : 0.15
+                } ,
+                noSteps       : {
+                    type    : 'i',
+                    value   : 120
+                } ,
+                mx          : {
+                    type    : 'f' ,
+                    value   : env.mx ,
+                } ,
+                my          : {
+                    type    : 'f',
+                    value   : env.my ,
+                } ,
+                lightShift  : {
+                    type    : 'f',
+                    value   : 0. ,
+                } ,
+            } ,
+            geometry        : cubeGeometry ,
+            cullFacing      : true ,
+            cullFace        : 'back' ,
+            depthTest       : true ,
+            clear           : true ,
+            canvas          : canvas_1, 
+} ) ;
+ 
+
+//var plot = new Abubu.VolumeRayCaster({
+//    target : fcolor ,
+//    channel : 'r' ,
+//    mx : env.mx ,
+//    my : env.my ,
+//    noSteps : 100 ,
+//    alphaCorrection : 0.15 ,
+//    minValue  : 0.01 ,
+//    maxValue  : 1.1 ,
+//    threshold : 0.5 ,
+//    scale : 0.7 ,
+//    canvas : canvas_1,
+//    floodLights     : [1.,1.,1.,
+//                       0.,0.,1,
+//                       -1,0.,0,
+//                       0,1,0,
+//                       0,-1,0,],
+//
+//    } ) ;
+//plot.initForeground() ;   /* initialize the plot */
+//plot.render() ;
 
 // marching steps ........................................................
 function marchUniforms(_inTexture ){
@@ -197,7 +342,14 @@ function run(){
                 march() ;
             }
         }
-        plot.render() ;
+        controler.update() ;
+        Abubu.mat4.scale( viewMatrix, viewMatrix, [1,1,1,1] ) ;
+        pass1.setUniform('viewMatrix', viewMatrix) ;
+        pass2.setUniform('viewMatrix', viewMatrix) ;
+
+        pass1.render() ;
+        pass2.render() ;
+        pass2.render() ;
         requestAnimationFrame(run) ;
 }
 
