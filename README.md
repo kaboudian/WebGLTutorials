@@ -20,6 +20,17 @@ The files and video recordings of the lectures will be regularly posted here.
 - Basic familiarity with computer coding preferably HTML, JavaScript and C programming
 - Having access to a text editor suitable for modifying computer code (Atom, Sublime, Notepad++, WinEdit, Bracket, VIM, EMACS)
 - Having access to a modern browser such as Google Chrome, Firefox, or similar (not Internet Explorer or Safari!)
+## Friday, October 02 -- Volume Ray Casting
+[![Volume Ray Casting - Oct 2, 2020](http://img.youtube.com/vi/X095f9QzSBo/0.jpg)](http://www.youtube.com/watch?v=X095f9QzSBo "Volume Ray Casting - Oct 2, 2020")
+
+[**^^ Watch the video lecture from the link above! ^^**](http://www.youtube.com/watch?v=X095f9QzSBo )
+
+### Objectives
+1. Introduction to Volume Ray Casting (VRC) algorithm 
+1. Implementing a VRC in WebGL using Abubu.js library
+
+You can download the necessary files for [October 02 session from here](./2020-October-02)
+
 
 ## Friday, September 25
 [![Friday, September 25](http://img.youtube.com/vi/OZ3EEHb-cxc/0.jpg)](http://www.youtube.com/watch?v=OZ3EEHb-cxc "Friday, September 25")
