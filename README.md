@@ -1,4 +1,4 @@
-# WebGL Tutorials
+# WebGL for Numerical PDEs
 _Special Course at GaTech (CSE-8903-C18)_
 
 ## General Info
