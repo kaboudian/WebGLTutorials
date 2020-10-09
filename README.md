@@ -20,6 +20,14 @@ The files and video recordings of the lectures will be regularly posted here.
 - Basic familiarity with computer coding preferably HTML, JavaScript and C programming
 - Having access to a text editor suitable for modifying computer code (Atom, Sublime, Notepad++, WinEdit, Bracket, VIM, EMACS)
 - Having access to a modern browser such as Google Chrome, Firefox, or similar (not Internet Explorer or Safari!)
+
+## Friday, October 09 -- Runge-Kutta Time-Stepping for Cardiac Models
+
+### Objectives
+1. Using functions with multiple output for RK4 implementation
+1. Using functions with single output for RK4 implementation
+
+
 ## Friday, October 02 -- Volume Ray Casting
 [![Volume Ray Casting - Oct 2, 2020](http://img.youtube.com/vi/X095f9QzSBo/0.jpg)](http://www.youtube.com/watch?v=X095f9QzSBo "Volume Ray Casting - Oct 2, 2020")
 
