@@ -24,11 +24,13 @@ layout (location = 0) out vec4 ocolor ;
  * function to calculate RK, K coeficients
  *========================================================================
  */
-void getKs(float U, float V, float diffusion, 
-        out float KU, out float KV){
-    KU = diffusion + U*(1.-U)*(U-a) - V ;
-    KV = epsilon*(b*U-V) ;
-    return ;
+#define U uv.x
+#define V uv.y
+vec2 getK(vec2 uv, float diffusion ){
+    return vec2(
+       diffusion + U*(1.-U)*(U-a) - V ,
+       epsilon*(b*U-V)  
+    ) ;
 }
 
 /*========================================================================
@@ -55,32 +57,18 @@ void main() {
     float diffusion = laplacian.r ;
 
     // RK updates ........................................................
-    float ku1, ku2, ku3, ku4 ;
-    float kv1, kv2, kv3, kv4 ;
+    vec2 k1, k2, k3, k4 ;
+    vec2 uv = vec2(u,v) ;
 
-    // k1
-    getKs( u, v, diffusion, ku1, kv1 ) ;
-    
-    // k2
-    getKs( u + 0.5*dt*ku1, v + 0.5*dt*kv1, diffusion, ku2, kv2 ) ;
-    
-    // k3
-    getKs( u + 0.5*dt*ku2, v + 0.5*dt*kv2, diffusion, ku3, kv3 ) ;
-    
-    // k4
-    getKs( u + dt*ku3, v + dt*kv3, diffusion, ku4, kv4 ) ;
+    k1 = getK(uv, diffusion );
+    k2 = getK(uv+0.5*dt*k1, diffusion) ;
+    k3 = getK(uv+0.5*dt*k2, diffusion) ;
+    k4 = getK(uv+dt*k3,     diffusion) ;
 
-    // final RK4 update
-    u = u + dt*(ku1 + 2.*ku2 + 2.*ku3 + ku4)/6.0 ;
-    v = v + dt*(kv1 + 2.*kv2 + 2.*kv3 + kv4)/6.0 ;
+    vec2 duv = dt*(k1+2.*k2+2.*k3+k4)/6. ;
 
-    //// gate time derivatives for FHN .....................................
-    //float du2dt = diffusion + u*(1.-u)*(u-a) - v ;
-    //float dv2dt = epsilon*(b*u-v) ;
-
-    //// marching gates ....................................................
-    //u += du2dt*dt ;
-    //v += dv2dt*dt ;
+    u = u + duv.x ;
+    v = v + duv.y ;
 
     // pacemaker logic ...................................................
     time += dt ;
