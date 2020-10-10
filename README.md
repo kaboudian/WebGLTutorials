@@ -22,11 +22,15 @@ The files and video recordings of the lectures will be regularly posted here.
 - Having access to a modern browser such as Google Chrome, Firefox, or similar (not Internet Explorer or Safari!)
 
 ## Friday, October 09 -- Runge-Kutta Time-Stepping for Cardiac Models
+[![RK4](http://img.youtube.com/vi/Uzs4XN5e6hU/0.jpg)](http://www.youtube.com/watch?v=Uzs4XN5e6hU "Rk4")
+
+[**^^ Watch the video lecture from the link above! ^^**](http://www.youtube.com/watch?v=Uzs4XN5e6hU)
 
 ### Objectives
 1. Using functions with multiple output for RK4 implementation
 1. Using functions with single output for RK4 implementation
 
+You can download the necessary files for [October 09 session from here](./2020-October-09)
 
 ## Friday, October 02 -- Volume Ray Casting
 [![Volume Ray Casting - Oct 2, 2020](http://img.youtube.com/vi/X095f9QzSBo/0.jpg)](http://www.youtube.com/watch?v=X095f9QzSBo "Volume Ray Casting - Oct 2, 2020")
