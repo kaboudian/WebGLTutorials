@@ -62,6 +62,7 @@ init.render() ;
 // post processing .......................................................
 var plot = new Abubu.Plot2D({
     target : fcolor,            /* the texture to visualize             */
+    phase  : domain ,
     channel : 'r',              /* the channel of interest:
                                         can be : 'r', 'g', 'b', or 'a' 
                                         defualt value is 'r'            */

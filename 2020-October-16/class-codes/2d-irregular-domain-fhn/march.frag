@@ -21,6 +21,11 @@ layout (location = 0) out vec4 ocolor ;
 #define v       color.g
 #define time    color.b
 
+// macros to deal with the irregular boundaries ..........................
+#define isin(pos)   (texture(domain, pos).r>0.5)
+#define vect(d)     ( isin(cc+(d)) ? (d) : (isin(cc-(d)) ? \
+            (-(d)) : (0.*(d)) ) )
+
 /*========================================================================
  * main body of the shader
  *========================================================================
@@ -31,16 +36,27 @@ void main() {
 
     vec2 ii = vec2(1.,0.)/size ;
     vec2 jj = vec2(0.,1.)/size ;
+
+    vec2 ip = ii+jj ;
+    vec2 jp = ii-jj ;
     
     // read the color of the pixel .......................................
     vec4 color = texture( inTexture , cc ) ;
     
+    float omega = 1./3. ;
     vec4 laplacian = 
-            texture( inTexture, cc-ii )
-        +   texture( inTexture, cc+ii )
-        +   texture( inTexture, cc-jj )
-        +   texture( inTexture, cc+jj )
-        -4.*texture( inTexture, cc    ) ;
+            texture( inTexture, cc+vect(-ii) )
+        +   texture( inTexture, cc+vect( ii) )
+        +   texture( inTexture, cc+vect(-jj) )
+        +   texture( inTexture, cc+vect( jj) )
+        -4.*texture( inTexture, cc    )  ;
+    laplacian = (1.-omega)*laplacian + omega*(
+            texture( inTexture, cc+vect(-ip) )
+        +   texture( inTexture, cc+vect( ip) )
+        +   texture( inTexture, cc+vect(-jp) )
+        +   texture( inTexture, cc+vect( jp) )
+        -4.*texture( inTexture, cc    ) 
+            )*0.5 ;
     laplacian = diffCoef*laplacian/(dx*dx) ;
     float diffusion = laplacian.r ;
 

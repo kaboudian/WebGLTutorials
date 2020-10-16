@@ -83,7 +83,7 @@ var plot = new Abubu.VolumeRayCaster({
     my : env.my ,
     noSteps : 100 ,
     alphaCorrection : 0.15 ,
-    structural_alpha : 0.1 ,
+    structural_alpha : 0.7 ,
     minValue  : 0.01 ,
     maxValue  : 1.1 ,
     threshold : 0.5 ,

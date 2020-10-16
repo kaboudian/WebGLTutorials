@@ -69,7 +69,7 @@ vec4 Texture3D(sampler2D inText, vec3 crd){
 }
 
 // macros to deal with the irregular boundaries ..........................
-#define isin(pos)   (texture(domain, pos).r>0.5)
+#define isin(pos)   (Texture3D(domain, pos).r>0.5)
 #define vect(d)     ( isin(CC+(d)) ? (d) : (isin(CC-(d)) ? \
             (-(d)) : (0.*(d)) ) )
 
@@ -84,18 +84,18 @@ void main() {
     vec3 CC = getVC(cc) ;
     vec3 ii = vec3(1.,0.,0.)/float(nx) ;
     vec3 jj = vec3(0.,1.,0.)/float(ny) ;
-    vec3 kk = vec3(0.,0.,1.)/(float(mx*my)+1.) ;
+    vec3 kk = vec3(0.,0.,1.)/(float(mx*my)) ;
 
     // read the color of the pixel .......................................
     vec4 color = texture( inTexture , cc ) ;
     
     vec4 laplacian = 
-            Texture3D( inTexture, CC-ii )
-        +   Texture3D( inTexture, CC+ii )
-        +   Texture3D( inTexture, CC-jj )
-        +   Texture3D( inTexture, CC+jj )
-        +   Texture3D( inTexture, CC+kk )
-        +   Texture3D( inTexture, CC-kk )
+            Texture3D( inTexture, CC+vect(-ii ))
+        +   Texture3D( inTexture, CC+vect(ii ))
+        +   Texture3D( inTexture, CC+vect(-jj ))
+        +   Texture3D( inTexture, CC+vect(jj ))
+        +   Texture3D( inTexture, CC+vect(kk ))
+        +   Texture3D( inTexture, CC+vect(-kk ))
         -6.*color ;
     float diffusion = diffCoef*laplacian.r/(dx*dx) ;
 
