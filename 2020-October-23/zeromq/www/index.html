@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head>
+   <!-- The following script provides the bidirectional communications 
+      with the socket.io platform -->
+   <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <h1>Sample Program</h1>
+    <button type='button' onclick='send("s");'>Send Signal S</button>
+</body>
+<script>
+var socket = io() ;
+function send(m){
+    socket.emit('msg', m ) ;
+    return ;
+}
+socket.on("A", function(msg){
+    console.log("Message '"+msg+"' was received from the server!") ;
+} ) ;
+</script>
+</html>
