@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OVVR</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <script src='http://abubujs.org/libs/Abubu.latest.js' 
+	    type='text/javascript'></script>
+</head>
+
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- All shaders included here (codes written in GLSL)                 -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+
+<!-- ***************************************************************** -->
+<script id='prng' type='x-shader-fragment'>#version 300 es
+
+precision highp float;
+precision highp int ;
+precision highp isampler2D ;
+precision highp usampler2D ;
+
+
+in vec2 cc ;
+
+
+// tinymt state and tempering texture
+uniform usampler2D  itinymtState , itinymtMat ;
+
+// output colors
+layout (location =0) out vec4  ocolor ;       // other color output
+layout (location =1) out uvec4 otinymtState ; // updated tinymt state
+
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * tinymt.glsl  :   a glsl file to be included the in the shaders
+ *
+ * PROGRAMMER   :   ABOUZAR KABOUDIAN
+ * DATE         :   Tue 31 Mar 2020 14:25:32 (EDT)
+ * PLACE        :   Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+
+// global variables and the macros for the tinymt algorithm --------------
+uvec4 tinymtState, tinymtMat ; 
+
+#define TINYMT32_SH0    1
+#define TINYMT32_SH1    10
+#define TINYMT32_SH8    8
+#define TINYMT32_MASK   uint(0x7fffffff)
+#define MIN_LOOP        8
+#define PRE_LOOP        8
+
+#define MAX_INT         4294967295
+#define MAX_INT_F       4294967295.
+
+/*========================================================================
+ * initTinyMt : initialize the Tiny Marsenne Twister for the shader
+ *========================================================================
+ */
+void tinymtInit(){
+    // Initialize the random number states 
+    tinymtState = texture( itinymtState, cc ) ;
+    tinymtMat   = texture( itinymtMat,   cc ) ;
+    return ;
+}
+
+/*========================================================================
+ * finish the tiny marsenne twister algorithm: should be called before the
+ * shader return call ;
+ *========================================================================
+ */
+void tinymtFinish(){
+    otinymtState = uvec4(tinymtState) ;
+}
+#define tinymtReturn  tinymtFinish
+
+/*========================================================================
+ * Iterate to the next state
+ *========================================================================
+ */
+void tinymtNextState(){
+    uint x,y ;
+    y = tinymtState.a ;
+    x = (tinymtState.r & TINYMT32_MASK)
+        ^ tinymtState.g
+        ^ tinymtState.b;
+    x ^= (x << TINYMT32_SH0);
+    y ^= (y >> TINYMT32_SH0) ^ x;
+    tinymtState.r = tinymtState.g;
+    tinymtState.g = tinymtState.b;
+    tinymtState.b = x ^ (y << TINYMT32_SH1);
+    tinymtState.a = y;
+    tinymtState.g ^= uint(-int(y & uint(1)) & int(tinymtMat.r));
+    tinymtState.b ^= uint(-int(y & uint(1)) & int(tinymtMat.g));
+
+    return ;
+}
+
+/*========================================================================
+ * temper the results
+ *========================================================================
+ */
+uint  tinymtTemper() {
+    uint t0, t1;
+    t0 = tinymtState.a;
+#if defined(LINEARITY_CHECK)
+  t1 = tinymtState.r
+      ^ (tinymtState.b >> TINYMT32_SH8);
+#else
+    t1 = tinymtState.r
+        + (tinymtState.b >> TINYMT32_SH8);
+#endif
+    t0 ^= t1;
+    t0 ^= uint(-int(t1 & uint(1)) & int(tinymtMat[2]));
+    return t0;
+}
+
+/*========================================================================
+ * Get a random number using the tiny marsenne twister 
+ *========================================================================
+ */
+uint tinymtUrand(){
+    tinymtNextState() ;
+    return tinymtTemper() ;
+}
+
+/*========================================================================
+ * tinymtFrand : returns a float number between 0-1 using the tiny mt
+ * algorithm.
+ *========================================================================
+ */
+float tinymtFrand(){
+    return float(tinymtUrand())/MAX_INT_F ;
+}
+#define tinymtRand tinymtFrand
+
+/*========================================================================
+ * returns an integer with the binomial distribution with a Bernouli trail
+ * of "npar" attempts with each attempt a chance of success of "p"
+ *========================================================================
+ */
+uint tinymtBinran(float p, uint npar){
+    uint isum = 0u ;
+    if ( p > 0.1 ){
+        for(uint i=0u ; i<npar ; i++){
+            if ( tinymtRand() < p ){
+                isum++ ;
+            }
+        }
+    }else{ /* for small probablities of p use a geometric distribution */
+        isum = uint( floor ( log( 1. - tinymtRand() ) /
+                             log( 1. - p            )   ) ) ; 
+    }
+    return isum ;
+}
+
+
+void main(){
+    // initialize tinymt states ..........................................
+    tinymtInit() ; 
+ 
+    ocolor = vec4(tinymtRand(), tinymtRand(), tinymtRand(),1.0) ;
+
+    // return tinymt states ..............................................
+    tinymtReturn() ;
+    return ;
+}
+
+
+</script><!-- end of prng shader's source code -->
+
+<!-- ***************************************************************** -->
+<script id='disp' type='x-shader-fragment'>#version 300 es
+precision highp float;
+precision highp int ;
+precision highp isampler2D ;
+precision highp usampler2D ;
+
+
+in vec2 cc ;
+
+// input texture
+uniform sampler2D icolor ;
+
+// output color
+out vec4 ocolor ;
+
+void main(){
+    ocolor = texture(icolor,cc) ;
+    return ;
+}
+
+
+</script><!-- end of disp shader's source code -->
+
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- body of the html page                                             -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<body>
+    <h1>PRNG</h1>
+    <table>
+        <tr>
+            <td>
+                <canvas id=canvas_1 width=512 height=512>
+                    Your browser doesn't support HTML5.0
+                </canvas>
+            </td>
+            <td>
+                <canvas id=canvas_2 width=512 height=512>
+                    Your browser doesn't support HTML5.0
+                </canvas>
+            </td>
+        </tr>
+    </table>
+</body>
+
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- main script - JavaScript code                                     -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script>
+// get the shader source by its id .......................................
+function source(id){
+    return document.getElementById(id).text ;
+}
+var env = {} ;
+
+// Get the canvas ........................................................
+var canvas_1 = document.getElementById('canvas_1') ;
+var canvas_2 = document.getElementById('canvas_2') ;
+
+// Object to be used for interactions ....................................
+
+env.width               = 512 ;
+env.height              = 512 ;
+
+// states for the random generator .......................................
+env.istate  = new Uint32Array(env.width*env.height*4) ;
+env.imat    = new Uint32Array(env.width*env.height*4) ;
+//
+// preparing the initial states for each pixel ...........................
+var p=0 ;
+var seed = 0 ;
+var tm = new Abubu.TinyMT({vmat: 0}) ;
+
+for(var j=0 ; j<env.height ; j++){
+    for(var i=0 ; i<env.width ; i++){
+        //  mat1            mat2            seed 
+        tm.mat[0] = i ;     tm.mat[1] = j ; tm.mat[3] = seed ;
+        tm.init() ;
+
+        for(var k=0 ; k<4 ; k++){
+            env.istate[p] = tm.state[k] ;  
+            env.imat[p] = tm.mat[k] ;  
+            p++ ;
+        }
+    }
+}
+
+// first time-step random textures .......................................
+env.ftinymtState = new Abubu.Uint32Texture( env.width, env.height ,
+        {data : env.istate ,pair : true } ) ;
+env.stinymtState = new Abubu.Uint32Texture( env.width, env.height ,
+        {data : env.istate ,pair : true } ) ;
+
+// mat state for each point of the generator .............................
+env.tinymtMat = new Abubu.Uint32Texture( env.width, env.height ,
+        {data : env.imat } ) ;
+
+
+// other texture generated using random numbers ..........................
+env.ocolor = new Abubu.Float32Texture( env.width, env.height ) ;
+
+
+// f-set of psuedo random number generaton
+env.fprng = new Abubu.Solver({
+    fragmentShader: source('prng') ,
+    uniforms : { 
+        itinymtState    :   { type : 't', value : env.ftinymtState  } ,
+        itinymtMat      :   { type : 't', value : env.tinymtMat     } ,
+    } ,
+    targets :{
+        ocolor :        { location : 0, target : env.ocolor } ,
+        otinymtState : { location :1 , target : env.stinymtState } ,
+    }
+} ) ;
+
+// s-set of psuedo random number generaton
+env.sprng = new Abubu.Solver({
+    fragmentShader: source('prng') ,
+    uniforms : { 
+        itinymtState    :   { type : 't', value : env.stinymtState } ,
+        itinymtMat      :   { type : 't', value : env.tinymtMat     } ,
+    } ,
+    targets :{
+        ocolor :        { location : 0, target : env.ocolor } ,
+        otinymtState : { location :1 , target : env.ftinymtState } ,
+    }
+} ) ;
+
+
+env.plot = new Abubu.Solver({
+    fragmentShader : source('disp') ,
+    uniforms : { 
+        icolor : { type : 't', value : env.ocolor } ,
+    } ,
+    canvas : canvas_1 
+} ) ;
+
+env.plot.render() ;
+
+env.frun = function(){
+    env.fprng.render() ;
+    env.plot.render() ;
+}   
+env.srun = function(){
+    env.sprng.render() ;
+    env.plot.render() ;
+}   
+
+// create graphical user interface .......................................
+var gui = new Abubu.Gui() ;     /*  create a graphical user 
+                                    interface               */
+var panel = gui.addPanel({width:300}) ; // add a panel to the GUI
+
+panel.add( env, 'frun' ) ;
+panel.add( env, 'srun' ) ;
+</script>
+
+</html>
