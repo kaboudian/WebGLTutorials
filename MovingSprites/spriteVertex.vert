@@ -34,7 +34,7 @@ void main(){
                                                           coordinates are
                                                           extracted fron
                                                           the shader */
-            0., /* z-coordinate is set 0 */ 
+            0., /* z-coordinate is set 0        */ 
 
-            1., /* default: no-magnification */ ) ;
+            1.  /* default: no-magnification    */ ) ;
 }
