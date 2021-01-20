@@ -1,0 +1,284 @@
+<!doctype html>
+<html>
+<head>
+    <title>Sprites</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <script src='https://abubujs.org/libs/Abubu.latest.js' 
+	    type='text/javascript'></script>
+
+</head>
+<body>
+<h1>Sprite Example</h1>
+<canvas id=canvas_1 width=512 height=512>
+    Your browser doesn't support HTML5.0
+</canvas>
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- All shaders included here (Codes written in glsl                   -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- ****************************************************************** -->
+<script id='init_coord' type='x-shader-fragment'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * init_coord   : Initialize the coordinates
+ *
+ * PROGRAMMER   : ABOUZAR KABOUDIAN
+ * DATE         : Wed 20 Jan 2021 14:12:30 (EST)
+ * PLACE        : Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+precision highp float ;
+
+in vec2 cc ;
+
+layout (location=0) out vec4 fcrdt ;
+layout (location=1) out vec4 scrdt ;
+
+void main(){
+    vec4 crd = vec4(0) ;
+
+    float theta  = cc.x*2.*acos(-1.) ;
+    float radius = 0.5*cc.y ;
+
+    // create a ring at the center of the screen (using the polar
+    // coordinate system.)
+    crd.xy = radius*vec2(cos(theta),sin(theta)) ;
+
+    // output the coorinates
+    fcrdt = vec4(crd) ;
+    scrdt = vec4(crd) ;
+
+    return ;
+}
+
+
+</script><!-- end of init_coord shader's source code -->
+
+<!-- ****************************************************************** -->
+<script id='coord' type='x-shader-fragment'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * coord        : A fragment shader to update the coordinate textures
+ *
+ * PROGRAMMER   : ABOUZAR KABOUDIAN
+ * DATE         : Wed 20 Jan 2021 14:50:33 (EST)
+ * PLACE        : Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+precision highp float ;
+in vec2 cc ;
+uniform sampler2D   icrdt ;
+
+layout (location = 0) out vec4 ocrdt ;
+
+#define time crd.a
+void main(){
+    vec4 crd = texture(icrdt, cc) ;
+
+    // a time variable which modifies the coordinates texture 
+    time += 0.05 ;
+    float PI = acos(-1.) ;
+    if (time > (2.*PI)){
+        time = 0. ;
+    }
+
+    // alter coordinates in the polar system based on time
+    float theta  = cc.x*2.*acos(-1.) + time ;
+    float radius = 0.5*cc.y + 0.25*(sin(time)+1.) ;
+    
+    crd.xy = radius*vec2(cos(theta),sin(theta)) ;
+
+    // output the new coordinate
+    ocrdt = vec4(crd) ;
+}
+
+
+</script><!-- end of coord shader's source code -->
+
+<!-- ****************************************************************** -->
+<script id='spriteVertex' type='x-shader-vertex'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * spriteVertex : The vertex shader that uses a texture to determine the 
+ * position of sprites.
+ *
+ * PROGRAMMER   : ABOUZAR KABOUDIAN
+ * DATE         : Wed 20 Jan 2021 15:15:58 (EST)
+ * PLACE        : Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+
+precision highp float ;
+precision highp int ;
+
+uniform sampler2D crdt ;
+in vec4  position ;     /* The position of the point (sprite) can be used
+                           to access the texture that contains the
+                           coordinate of the vertex. Here, we only use the
+                           x, and y values so that we can access the the
+                           texture.
+
+                           If needed, notice how position is a vec4 and
+                           can pack extra info if needed */
+
+out vec2 pointIndex ;  /*   index of each of the sprite points is sent to
+                            fragment shader for coloring. I used this to
+                            demonstrate the movement of each sprite.    */
+
+void main(){
+    pointIndex = position.xy ;
+    
+    // remember gl_Positions coordinates are within (-1. and 1.) 
+    gl_Position = vec4( texture(crdt,position.xy).xy , /* x and y
+                                                          coordinates are
+                                                          extracted fron
+                                                          the shader */
+            0., /* z-coordinate is set 0 */ 
+
+            1., /* default: no-magnification */ ) ;
+}
+
+
+</script><!-- end of spriteVertex shader's source code -->
+
+<!-- ****************************************************************** -->
+<script id='spriteFragment' type='x-shader-fragment'>#version 300 es
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * spriteFragment:  Fragment shader to color the sprites
+ *
+ * PROGRAMMER   :   ABOUZAR KABOUDIAN
+ * DATE         :   Wed 20 Jan 2021 14:39:15 (EST)
+ * PLACE        :   Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+precision highp float ;
+in vec2 pointIndex ; /* index of the sprite point used for coloring
+                        purposes. */
+out vec4 color ;
+void main(){
+    // try coloring all points black for your flocking application 
+    color = vec4(pointIndex,0,1.) ;
+    return ;
+}
+
+
+</script><!-- end of spriteFragment shader's source code -->
+
+
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<!-- main script - JavaScript code                                      -->
+<!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+<script>
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ * app.js       : Main JavaScript code
+ *
+ * PROGRAMMER   : ABOUZAR KABOUDIAN
+ * DATE         : Wed 20 Jan 2021 14:03:11 (EST)
+ * PLACE        : Chaos Lab @ GaTech, Atlanta, GA
+ *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ */
+
+// get the shader source by its id .......................................
+function source(id){
+    return document.getElementById(id).text ;
+}
+
+
+var canvas_1 = document.getElementById( 'canvas_1' ) ;
+
+// Object to be used for interactions ....................................
+var env = {} ;
+
+env.width   = 128 ;
+env.height  = 128 ;
+
+// coordinate textures ...................................................
+env.fcrdt = new Abubu.Float32Texture( env.width , env.height) ;
+env.scrdt = new Abubu.Float32Texture( env.width , env.height) ;
+
+
+// solver to initialize coordinate textures ..............................
+env.init = new Abubu.Solver({
+    fragmentShader : source('init_coord') ,
+    targets : {
+        fcrdt : { location : 0, target: env.fcrdt } ,
+        scrdt : { location : 1, target: env.scrdt } ,
+    }
+} ) ;
+env.init.render() ;
+
+// geometry update solvers ...............................................
+env.fcoord = new Abubu.Solver({
+    fragmentShader : source( 'coord' ) ,
+    uniforms : { 
+        icrdt : { type : 't' , value : env.fcrdt } 
+    } ,
+    targets: {
+        ocrdt : { location : 0, target : env.scrdt } ,
+    }
+} ) ;
+env.scoord = new Abubu.Solver({
+    fragmentShader : source( 'coord' ) ,
+    uniforms : { 
+        icrdt : { type : 't' , value : env.scrdt } 
+    } ,
+    targets: {
+        ocrdt : { location : 0, target : env.fcrdt } ,
+    }
+} ) ;
+env.coord = function(){
+    env.fcoord.render() ;
+    env.scoord.render() ;
+}
+
+// creating the sprite geometry ..........................................
+env.sprites ={} ;
+env.sprites.vertices    = [] ;
+env.sprites.noCoords    = 3 ;
+env.sprites.noVertices  = env.width*env.height ; // number of sprites
+env.sprites.type        = 'FLOAT' ;
+env.sprites.premitive   = 'POINTS' ;
+
+/* nested loops create the sprite vertice coordinates that are used to 
+ * access the displayed coordinate from the textures */ 
+for(var i=0 ; i< env.width ; i++){
+    for(var j=0; j< env.height ; j++){
+        /* x and y act like cc.x and cc.y to read coordinates from the
+         * uniform textures */
+        let x = (i+0.5)/env.width ;   
+        let y = (j+0.5)/env.height ; 
+
+        // push the x, y, and z indices of the vertex
+        env.sprites.vertices.push(x) ; 
+        env.sprites.vertices.push(y) ;
+        env.sprites.vertices.push(0) ;
+    }
+}
+
+// creating the display solver ...........................................
+// this display solver uses the sprite geometry and the custom vertex and
+// fragment shaders for updating the position of the vertices based on the
+// env.fcrdt texture as the coordinates of the points
+env.display = new Abubu.Solver({
+    vertexShader : source('spriteVertex') ,
+    fragmentShader: source( 'spriteFragment') ,
+    uniforms: {
+        crdt : { type : 't', value : env.fcrdt } , // coordinate texture
+    } ,
+    geometry : env.sprites , // we use the custom geometry
+    canvas : canvas_1 
+} ) ;
+
+
+// run sequence ..........................................................
+env.run = function(){
+    env.coord() ;               /* update the coordinate textures which can
+                                   be replaced by your flocking code    */
+    env.display.render() ;      /* custom display solver that uses our
+                                   custom sprite geometry and shaders   */
+    requestAnimationFrame( env.run ) ;
+}
+
+env.run() ;
+</script>
+</body>
+</html>
