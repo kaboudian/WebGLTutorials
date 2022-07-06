@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <script src='http://abubujs.org/libs/Abubu.latest.js' 
+    <script src='http://abubujs.org/libs/Abubu.v6.8.04.js' 
 	    type='text/javascript'></script>        
 </head>
 
